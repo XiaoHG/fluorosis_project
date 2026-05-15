@@ -1,0 +1,54 @@
+# Obsidian
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.trash/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Experiments & runtime
+06_Implementation/checkpoints/*
+!06_Implementation/checkpoints/.gitkeep
+06_Implementation/logs/*
+!06_Implementation/logs/.gitkeep
+06_Implementation/results/*
+!06_Implementation/results/.gitkeep
+07_Visualization/01_drafts/*.png
+07_Visualization/02_final_figures/*
+!07_Visualization/02_final_figures/.gitkeep
+
+# LaTeX artifacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Sensitive data
+*.pth
+*.pt
+*.pkl
+/data/
+/datasets/
