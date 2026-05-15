@@ -46,6 +46,10 @@ build/
 .DS_Store
 Thumbs.db
 
+# Literature PDFs & extracted text (too large, keep local only)
+/02_Literature/01_initial_search/References/
+/02_Literature/01_initial_search/References_extracted/
+
 # Sensitive data
 *.pth
 *.pt
