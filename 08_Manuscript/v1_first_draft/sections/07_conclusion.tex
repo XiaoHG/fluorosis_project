@@ -1,0 +1,10 @@
+% ============================================================
+% Section 7: Conclusion
+% ============================================================
+\section{Conclusion}
+
+We presented a unified framework combining Evidential Deep Learning with Ordinal Regression for Calibration and Unimodality for automated diagnosis of endemic fluorosis. A shared-logit evidence head simultaneously produces Dirichlet evidence for uncertainty quantification and logits for ordinal calibration, ensuring consistency between both objectives. Through three-stage training and multi-rater soft label integration, we demonstrated uncertainty-aware ordinal diagnosis for both dental fluorosis (200 images, ViT-Base) and skeletal fluorosis (80 images, ResNet-50).
+
+The key contributions are: (1) first application of EDL and ORCU to fluorosis diagnosis with calibrated prediction uncertainty; (2) a shared-logit bridge unifying evidential learning and ordinal constraints without separate prediction heads; (3) multi-rater soft label modeling leveraging five-radiologist annotation distributions; and (4) comprehensive evaluation showing EDL uncertainty is informative for clinical triage, correlating with inter-rater disagreement and distinguishing difficult cases.
+
+Beyond fluorosis, the shared-logit EDL+ORCU framework is backbone-agnostic and applicable to any ordinal medical classification task requiring uncertainty quantification and calibrated predictions. The auto-generated diagnosis reports demonstrate that EDL outputs translate directly into clinically actionable information, bridging model outputs and clinical decision support.

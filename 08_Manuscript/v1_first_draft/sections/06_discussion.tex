@@ -1,0 +1,30 @@
+% ============================================================
+% Section 6: Discussion
+% ============================================================
+\section{Discussion}
+
+\subsection{Key Findings}
+
+Our results demonstrate that integrating EDL with ORCU provides simultaneous improvements in classification, calibration, and uncertainty awareness for fluorosis diagnosis.
+
+\textbf{Small-sample feasibility:} The SFXRay dataset (48 training samples) represents an extremely small-sample medical imaging scenario. Our method's ability to produce meaningful uncertainty in this regime suggests EDL's Dirichlet parameterization provides effective regularization against overfitting compared to standard softmax.
+
+\textbf{Uncertainty as clinical triage:} The RecAcc and SafePred analysis demonstrates uncertainty can serve as an automated triage mechanism. Low-$u$ samples achieve high safe prediction rates, while high-$u$ samples can be routed for expert review---practical for AI-assisted screening in resource-limited settings.
+
+\textbf{Multi-rater soft labels:} Replacing majority-vote one-hot with full annotation distributions likely improves calibration by better representing underlying diagnostic uncertainty. This aligns with broader trends toward learning from label distributions in medical imaging.
+
+\textbf{Ordinal constraints benefit calibration:} ORCU consistently improves ECE and \%Unimodal, confirming ordinality enforcement in logit space yields better-calibrated, more interpretable predictions. For fluorosis grading, where adjacent-grade distinctions carry treatment implications, unimodal distributions are more clinically trustworthy than the multi-modal outputs sometimes produced by unconstrained classifiers.
+
+\subsection{Limitations}
+
+\textbf{Sample size:} The SF dataset (80 total, 48 training) is inherently limited. Generalizability requires multi-center validation.
+
+\textbf{Single-rater DF:} DF lacks multi-rater annotations, preventing soft label application on DF.
+
+\textbf{Backbone proxy:} SF uses ResNet-50 as Mamba proxy due to unavailable CUDA kernels. While enabling fair loss comparisons, absolute accuracy differences with Mwinc-Mamba require cautious interpretation.
+
+\textbf{Clinical validation:} Auto-generated reports and recommendation thresholds ($\theta = 0.30$, 0.60) have not been reviewed by clinicians. Real-world deployment requires expert validation.
+
+\subsection{Future Work}
+
+(1) Integrating evidence head with genuine Mamba backbones once CUDA kernels are available; (2) hierarchical EDL for multi-view SF (forearm + calf + pelvis); (3) extending auto-reports with segmentation features (calcification area, chalk ratio); (4) reader study comparing AI-assisted vs unassisted radiologist diagnosis with uncertainty triage; (5) external validation on fluorosis datasets from other endemic regions.

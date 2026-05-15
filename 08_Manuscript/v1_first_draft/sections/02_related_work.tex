@@ -1,0 +1,22 @@
+% ============================================================
+% Section 2: Related Work
+% ============================================================
+\section{Related Work}
+
+\subsection{Deep Learning for Fluorosis Diagnosis}
+
+Automated fluorosis diagnosis using deep learning is a relatively nascent field. For dental fluorosis (DF), Xu et al. proposed MLTrMR \cite{xu2025mltrmr}, a Masked Latent Transformer achieving 80.19\% accuracy on a 200-image balanced 4-class dataset. For skeletal fluorosis (SF), the same group proposed Mwinc-Mamba \cite{xu2025mwinc}, a hybrid Mamba-CNN architecture achieving 66.67\% accuracy on an 80-image dataset. Human radiologist performance on the same SF dataset averages 70.00\% (range 48.8--86.2\%), with pairwise inter-rater agreement averaging only 54.1\%, highlighting both the diagnostic difficulty and the need for uncertainty quantification.
+
+All existing approaches share a paradigm: nominal classification via cross-entropy loss on majority-vote one-hot labels. This ignores (1) the ordinal nature of fluorosis grades, (2) prediction uncertainty, and (3) inter-rater variability as a signal rather than noise. Our work addresses all three gaps.
+
+\subsection{Evidential Deep Learning}
+
+Evidential Deep Learning (EDL), introduced by Sensoy et al. \cite{sensoy2018edl}, replaces softmax outputs with Dirichlet distribution parameters. The model outputs concentration parameters $\alpha_k > 1$, from which $p_k = \alpha_k / S$, evidence $e_k = \alpha_k - 1$, and uncertainty $u = K / S$. Training minimizes Type II Maximum Likelihood with a KL regularizer that shrinks non-target evidence. EDL has been applied to skin lesion classification, histopathology, and COVID-19 diagnosis, showing Dirichlet-based uncertainty is informative for clinical decisions. However, EDL has not been applied to fluorosis diagnosis or combined with ordinal regression.
+
+\subsection{Ordinal Regression and Calibration}
+
+Ordinal regression addresses classification with ordered labels. Standard deep learning approaches include threshold-based cumulative probabilities and loss modifications penalizing order violations. Kim et al. recently proposed ORCU \cite{kim2025orcu}, combining SORD (Soft-Encoded Ordinal Regression) with log-barrier regularization enforcing logit monotonicity. The log-barrier on $r_k = z_k - z_{k+1}$ ensures unimodal predictive distributions. ORCU was demonstrated on age estimation and depth prediction but not medical image classification. We adapt ORCU to medical ordinal classification via shared logits with the EDL evidence head.
+
+\subsection{Multi-Rater Modeling}
+
+Medical image annotation often involves multiple raters with varying expertise. Recent work has explored soft label learning, rater-specific bias modeling, and annotation distributions as training targets. The SFXRay dataset is well-suited for multi-rater modeling with five independent 4-grade annotations per image, enabling construction of continuous soft targets from the full annotation distribution.

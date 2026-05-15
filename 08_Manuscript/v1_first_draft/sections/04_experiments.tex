@@ -1,0 +1,50 @@
+% ============================================================
+% Section 4: Experiments
+% ============================================================
+\section{Experimental Setup}
+
+\subsection{Datasets}
+
+\textbf{DFID (Dental Fluorosis):} 200 intraoral photographs, $512 \times 256$, balanced 4-class (50 each: Normal/Mild/Moderate/Severe). Split: 120/20/60 (train/val/test), aligned with MLTrMR test partition.
+
+\textbf{SFXRay (Skeletal Fluorosis):} 80 X-ray images, $512 \times 1024$, forearm/calf/pelvis. Distribution: Normal=21, Mild=34, Moderate=13, Severe=12. Five radiologists independently annotated each image. Pairwise 4-grade agreement: 54.1\% avg (range 40.0\%--67.5\%). Rater-vs-GT agreement: 48.8\%--86.2\%. Split: 48/8/24 following original Mode-based partition. 59 abnormal cases have segmentation masks; 21 Normal cases do not (healthy, no lesions to segment).
+
+\subsection{Baselines and Our Methods}
+
+\textbf{Baselines:}
+\begin{itemize}
+    \item CE: Same backbone + cross-entropy.
+    \item MLTrMR \cite{xu2025mltrmr}: Reported 80.19\% DF (paper value).
+    \item Mwinc-Mamba \cite{xu2025mwinc}: Reported 66.67\% SF (paper value).
+    \item 5 Radiologists Avg: 70.00\% SF (paper value).
+\end{itemize}
+
+\textbf{Our methods:}
+\begin{itemize}
+    \item EDL Only: Backbone + Evidence Head + $L_{\text{EDL}}$.
+    \item ORCU Only: Backbone + Standard Head + $L_{\text{ORCU}}$.
+    \item EDL+ORCU (Ours): Backbone + Evidence Head + $L_{\text{EDL}} + \lambda L_{\text{ORCU}}$.
+    \item EDL+ORCU + MR (Ours, SF only): Above + multi-rater soft labels.
+\end{itemize}
+
+\subsection{Evaluation Metrics}
+
+Eight metrics + two clinical decision-support metrics:
+\begin{itemize}
+    \item \textbf{Acc}, \textbf{Macro-F1}: Classification performance.
+    \item \textbf{QWK}: Ordinal agreement with quadratic penalty.
+    \item \textbf{ECE} (15 bins), \textbf{SCE}: Calibration error.
+    \item \textbf{\%Unimodal}: Fraction of unimodal predicted distributions.
+    \item \textbf{U-ECE}: Uncertainty-binned calibration error.
+    \item \textbf{AUROC($u$)}: Uncertainty as misclassification predictor.
+    \item \textbf{RecAcc} ($\theta=0.30$): Misclassification rate among high-$u$ samples.
+    \item \textbf{SafePred} ($\theta=0.30$): Accuracy among low-$u$ samples.
+\end{itemize}
+
+\subsection{Ablations and Uncertainty Analysis}
+
+Six ablation studies (A1--A6): loss components, label encoding, $\lambda$ sweep ($\{0.1, 0.3, 0.5, 0.7, 1.0\}$), $\tau$ sweep ($\{1.0, 3.0, 5.0, 10.0\}$), KL annealing, multi-rater soft labels.
+
+Six uncertainty analyses (U1--U6): evidence per class, uncertainty vs error, OOD detection, uncertainty by body part (SF), rater agreement vs model uncertainty correlation, RecAcc/SafePred across $\theta$ thresholds.
+
+All experiments: 5-fold CV with paired t-test ($\alpha = 0.05$), mean $\pm$ std reported.

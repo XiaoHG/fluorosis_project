@@ -1,0 +1,59 @@
+# SF (Skeletal Fluorosis) — ResNet-50 + EDL + ORCU
+# Dataset: 80 X-ray images, 4-class imbalanced (N21/M34/Mo13/S12)
+# Competitor: Mwinc-Mamba 66.67% Acc, Radiologists 70.00% (paper-reported)
+# ResNet-50 is proxy for Mamba when CUDA kernels unavailable
+
+task: sf
+data_root: "../.."
+
+data:
+  num_classes: 4
+  input_size: 224
+  class_names: ["Normal", "Mild", "Moderate", "Severe"]
+  class_distribution: [21, 34, 13, 12]
+
+model:
+  backbone: resnet50
+  pretrained: true
+  freeze_backbone: false
+  dim: 2048
+  num_classes: 4
+  dropout: 0.1
+
+training:
+  batch_size: 16
+  epochs: 150
+  num_workers: 4
+
+optimizer:
+  name: adamw
+  lr_backbone: 1.0e-4
+  lr_head: 1.0e-3
+  weight_decay: 0.05
+
+scheduler:
+  warmup_epochs: 10
+  name: cosine
+
+loss:
+  lambda_orcu: 0.5
+  lambda_kl: 0.1
+  orcu_t: 3.0
+
+stages:
+  stage_1_epochs: 10   # CE warmup (longer for smaller dataset)
+  stage_2_epochs: 45   # EDL only
+
+augmentation:
+  random_resized_crop:
+    scale: [0.8, 1.0]
+  random_horizontal_flip:
+    p: 0.5
+  random_rotation:
+    degrees: 10
+
+ablation:
+  use_edl: true
+  use_orcu: true
+  use_kl_annealing: true
+  use_sord_encoding: true

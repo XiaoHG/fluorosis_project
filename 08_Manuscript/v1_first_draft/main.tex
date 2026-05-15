@@ -1,0 +1,71 @@
+% ============================================================
+%  Evidential Deep Learning with Ordinal Calibration
+%  for Automated Diagnosis of Endemic Fluorosis
+%  Target: Medical Image Analysis (MedIA)
+% ============================================================
+\documentclass[review,12pt]{elsarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{color}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{lineno}
+
+\linenumbers
+
+\journal{Medical Image Analysis}
+
+\begin{document}
+
+% ============================================================
+% Title
+% ============================================================
+\title{Evidential Deep Learning with Ordinal Calibration for Automated Diagnosis of Endemic Fluorosis}
+
+\author{Xiaohong Gao\corref{cor1}}
+\ead{[email protected]}
+
+\address{School of Computer Science and Technology, [University], [City], China}
+
+\cortext[cor1]{Corresponding author}
+
+% ============================================================
+% Abstract
+% ============================================================
+\begin{abstract}
+Automated diagnosis of endemic fluorosis---both dental fluorosis (DF) and skeletal fluorosis (SF)---poses a challenging ordinal classification problem complicated by inter-rater variability and small datasets. Existing deep learning approaches rely on standard cross-entropy classification, producing point estimates without uncertainty quantification and ignoring the ordinal nature of fluorosis grading (Normal $<$ Mild $<$ Moderate $<$ Severe). We propose a unified framework combining Evidential Deep Learning (EDL) with Ordinal Regression for Calibration and Unimodality (ORCU) via a shared-logit architecture. A single evidence head outputs Dirichlet concentration parameters $\alpha$ that serve dual purposes: the EDL path derives prediction, evidence, and uncertainty from $\alpha$, while the ORCU path applies soft ordinal encoding and log-barrier regularization on the shared logits $z$. We further incorporate multi-rater soft labels from five radiologists to capture annotation uncertainty. On a 200-image DF dataset and an 80-image SF dataset with 5-radiologist annotations, our method achieves superior calibrated accuracy, provides informative uncertainty estimates, and enforces unimodal predictive distributions through ordinal constraints. The proposed framework is backbone-agnostic and demonstrates that uncertainty-aware ordinal diagnosis is feasible even with fewer than 100 training samples.
+
+\textbf{Keywords:} Evidential Deep Learning, Ordinal Regression, Uncertainty Quantification, Dental Fluorosis, Skeletal Fluorosis, Multi-Rater Annotation
+\end{abstract}
+
+% ============================================================
+% Sections
+% ============================================================
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_method}
+\input{sections/04_experiments}
+\input{sections/05_results}
+\input{sections/06_discussion}
+\input{sections/07_conclusion}
+
+% ============================================================
+% Acknowledgments
+% ============================================================
+\section*{Acknowledgments}
+The authors thank the Department of Radiology at [Hospital] for providing the skeletal fluorosis X-ray dataset and the five radiologists (CBQ, CF, XR, ZY, ZYC) for their annotation efforts. This work was supported by [Funding].
+
+% ============================================================
+% Bibliography
+% ============================================================
+\bibliographystyle{elsarticle-num}
+\bibliography{references}
+
+\end{document}

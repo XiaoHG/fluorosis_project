@@ -45,6 +45,10 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+._*
+
+# Kaggle zip archives (too large)
+Kaggle_Setup/*.zip
 
 # Literature PDFs & extracted text (too large, keep local only)
 /02_Literature/01_initial_search/References/

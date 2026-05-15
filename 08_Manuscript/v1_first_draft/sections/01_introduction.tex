@@ -1,0 +1,20 @@
+% ============================================================
+% Section 1: Introduction
+% ============================================================
+\section{Introduction}
+
+Endemic fluorosis, caused by excessive fluoride intake through drinking water, food, or industrial exposure, remains a significant public health concern affecting millions worldwide, particularly in regions of China, India, and East Africa \cite{gu2024zunyi}. The disease manifests in two primary forms: dental fluorosis (DF), characterized by chalky white streaks, staining, and enamel defects on teeth, and skeletal fluorosis (SF), involving bone and joint changes including osteosclerosis, ligament calcification, and in severe cases, crippling deformities. Clinical diagnosis follows a 4-grade ordinal scale: Normal (0), Mild (1), Moderate (2), and Severe (3), typically assessed through visual inspection of intraoral photographs for DF and X-ray interpretation for SF.
+
+Recent advances in deep learning have enabled automated fluorosis diagnosis with promising accuracy. Xu et al. proposed MLTrMR achieving 80.19\% accuracy on a 200-image DF dataset using a masked latent transformer \cite{xu2025mltrmr}, and Mwinc-Mamba achieving 66.67\% accuracy on an 80-image SF dataset using a Mamba-CNN hybrid architecture \cite{xu2025mwinc}. However, these approaches share three fundamental limitations. First, they rely on standard cross-entropy loss, which treats fluorosis grades as nominal categories, discarding the inherent ordinal structure (Normal $<$ Mild $<$ Moderate $<$ Severe) critical for clinical grading. Second, they produce point-estimate predictions without any measure of prediction uncertainty---a crucial limitation in medical diagnosis where knowing when the model is uncertain is as important as knowing the predicted grade. Third, they use majority-vote one-hot labels despite substantial inter-rater disagreement among radiologists (pairwise 4-grade agreement averaging only 54.1\% across 5 radiologists on the SF dataset), thereby discarding valuable information about annotation ambiguity.
+
+To address these limitations, we propose a unified framework integrating Evidential Deep Learning (EDL) \cite{sensoy2018edl} with Ordinal Regression for Calibration and Unimodality (ORCU) \cite{kim2025orcu} for automated fluorosis diagnosis. Our key contributions are:
+
+\begin{enumerate}
+    \item \textbf{Uncertainty-aware ordinal diagnosis via a shared-logit bridge:} We design a single evidence head that outputs logits $z$, serving both the EDL path ($z \to \text{Softplus} \to \alpha$, producing Dirichlet evidence and uncertainty) and the ORCU path ($z \to \text{Softmax} \to p$, with soft ordinal encoding and log-barrier regularization). This shared-logit architecture ensures consistency between evidence accumulation and ordinal constraints.
+
+    \item \textbf{First application of EDL and ORCU to fluorosis diagnosis:} To our knowledge, this is the first work introducing evidential deep learning and ordinal regression loss to endemic fluorosis automated diagnosis, providing calibrated prediction uncertainty that standard approaches cannot offer.
+
+    \item \textbf{Multi-rater soft label modeling:} We replace majority-vote one-hot targets with soft label distributions constructed from five radiologists' annotations on the SF dataset, allowing the model to learn from annotation ambiguity rather than treating it as noise.
+
+    \item \textbf{Comprehensive evaluation on dual-task fluorosis:} We systematically evaluate our method on both DF (200 images, ViT-Base) and SF (80 images, ResNet-50) tasks, demonstrating that uncertainty-aware ordinal diagnosis is feasible even with fewer than 100 training samples, and that EDL uncertainty correlates with inter-rater disagreement.
+\end{enumerate}

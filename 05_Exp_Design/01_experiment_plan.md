@@ -50,20 +50,20 @@ status: draft
 | # | Model | Loss | 说明 | 数据来源 |
 |---|-------|------|------|---------|
 | B4 | ResNet-50 | CE | 通用 baseline | own run |
-| B5 | Mwinc-SSM | CE | Backbone baseline (no EDL/ORCU) | own run |
-| B6 | Mwinc-Mamba | CE | Reported SOTA | 论文数值 (66.67%) |
-| B7 | 5 Radiologists avg | — | 人类基线 (仅 SF) | 论文数值 (70.00%) |
+| B5 | Mwinc-Mamba | CE | Reported SOTA (Mamba backbone) | 论文数值 (66.67%) |
+| B6 | 5 Radiologists avg | — | 人类基线 (仅 SF) | 论文数值 (70.00%) |
 
 ### 2.3 Our Methods
 
 | # | Model | Loss | 说明 |
 |---|-------|------|------|
-| O1 | ViT-B + EvidenceHead | EDL only | EDL 单独效果 |
-| O2 | ViT-B | ORCU only | ORCU 单独效果 |
-| O3 | ViT-B + EvidenceHead | EDL + ORCU (ours) | 完整方法 |
-| O4 | Mwinc-SSM + EvidenceHead | EDL only |
-| O5 | Mwinc-SSM | ORCU only |
-| O6 | Mwinc-SSM + EvidenceHead | EDL + ORCU (ours) | 完整方法 |
+| O1 | ViT-B + EvidenceHead | EDL only | EDL 单独效果 (DF) |
+| O2 | ViT-B | ORCU only | ORCU 单独效果 (DF) |
+| O3 | ViT-B + EvidenceHead | EDL + ORCU (ours) | 完整方法 (DF) |
+| O4 | ResNet-50 + EvidenceHead | EDL only | EDL 单独效果 (SF) |
+| O5 | ResNet-50 | ORCU only | ORCU 单独效果 (SF) |
+| O6 | ResNet-50 + EvidenceHead | EDL + ORCU (ours) | 完整方法 (SF) |
+| O7 | ResNet-50 + EvidenceHead | EDL + ORCU + MR | + Multi-Rater soft labels (SF only) |
 
 ---
 
@@ -89,6 +89,7 @@ status: draft
 | U3 | OOD detection: 非氟区域牙齿照片 | EDL 应给 OOD 样本高 u → 验证 EDL 的 OOD 检测能力 |
 | U4 | SF uncertainty by body part | 前臂 vs 小腿 vs 骨盆 — 哪个部位最难 |
 | U5 | Radiologist agreement vs model uncertainty | 医生间不一致的样本 → 模型是否也给高 u |
+| U6 | RecAcc & SafePred across θ ∈ {0.1, 0.2, 0.3, 0.4, 0.5} | 验证不确定性阈值对自动分诊效果的影响，确定最优 θ |
 
 ### U5 是关键创新分析
 
@@ -109,6 +110,14 @@ status: draft
 | 单峰性 | %Unimodal predictions | ↑ |
 | 不确定性质量 | U-ECE (Uncertainty-ECE) | ↓ |
 | 不确定性鉴别力 | AUROC (u vs error) | ↑ |
+| 自动分诊准确率 | RecAcc (Recommendation Accuracy) | ↑ |
+| 安全预测率 | SafePred (Safe Prediction Rate) | ↑ |
+
+RecAcc 和 SafePred 的定义 (θ=0.30):
+- **RecAcc = 1 - Acc(high-u)** — 高不确定性样本中，模型推荐人工复核的比例中实际误诊的占比（越高越好，说明 u 有效识别了困难样本）
+- **SafePred = Acc(low-u)** — 低不确定性样本的准确率（越高越好，说明模型对"有把握"的样本确实可靠）
+
+这两个指标直接支撑自动诊断报告（03_Innovation/02_idea_proposals/auto_diagnosis_report.md）中的临床分诊场景。
 
 ### 5.2 统计检验
 
@@ -132,4 +141,4 @@ status: draft
 | MLTrMR (DF) | — | Acc 80.19%, F1 75.79% | ViT-B+CE 作为我们复现的 baseline proxy |
 | Mwinc-Mamba (SF) | — | Acc 66.67%, Radiologist 70.00% | Mwinc-SSM+CE 作为我们的 baseline proxy |
 
-**复现策略**: 不试图完全复现 MLTrMR 的 Masked Latent Transformer (太复杂)，而是以 ViT-B+CE 作为合理的 Transformer baseline。如果我们的 ViT-B+CE 接近 80.19%，则我们的 O3 (ViT+EDL+ORCU) 超越它是公平对比。同理，SF 以 Mwinc-SSM+CE 为 baseline。
+**复现策略**: 不试图完全复现 MLTrMR 的 Masked Latent Transformer (太复杂)，而是以 ViT-B+CE 作为合理的 Transformer baseline。如果我们的 ViT-B+CE 接近 80.19%，则我们的 O3 (ViT+EDL+ORCU) 超越它是公平对比。同理，SF 以 ResNet-50+CE 为 baseline，与 Mwinc-Mamba (66.67%) 的对比在相同 ResNet-50 backbone 下进行 loss-function 消融。论文中明确区分 backbone 差异和 loss 贡献。

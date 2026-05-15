@@ -15,7 +15,7 @@ status: draft
 ## 一、设计原则
 
 1. **EDL 和 ORCU 共享 logits**: Backbone → Evidence Head 输出 logits z，EDL 从 z 经 Softplus 得 α，ORCU 直接在 z 上做有序正则 — 不需要多套参数
-2. **Backbone-agnostic**: DF 用 ViT-B, SF 用 Mamba-CNN hybrid — EDL+ORCU loss 是 backbone-agnostic 创新
+2. **Backbone-agnostic**: DF 用 ViT-B, SF 用 ResNet-50 — EDL+ORCU loss 是 backbone-agnostic 创新，可替换任何 backbone
 3. **Drop-in loss**: 整个模型只需要替换 classifier head + loss function，不改变 backbone 结构
 
 ---
@@ -29,7 +29,7 @@ status: draft
         ┌─────────────────────────────────┐
         │         Backbone                 │
         │  DF:  ViT-Base (86M)             │
-        │  SF:  Mwinc-SSM (custom)         │
+        │  SF:  ResNet-50 (25M)            │
         │  Output: feature vector f ∈ R^D  │
         └─────────────────────────────────┘
                          │
@@ -189,19 +189,17 @@ def total_loss(alpha, z, y, epoch, total_epochs, lambda_orcu=0.5, lambda_kl=0.1)
 | 输出维度 | 768 (CLS token) |
 | 预训练 | ImageNet-21k + ImageNet-1k |
 
-### 5.2 SF Backbone: Mwinc-SSM
+### 5.2 SF Backbone: ResNet-50
 
 | 参数 | 值 |
 |------|-----|
-| 模型 | Custom 4-stage Mamba-CNN hybrid |
-| 参数量 | ~25M (estimated from paper) |
+| 模型 | ResNet-50 (torchvision) |
+| 参数量 | ~25M |
 | 输入尺寸 | 512×1024 → resize 224×224 |
-| Stage 1 | Patch Embed (4×4) → C=96 |
-| Stage 2 | Patch Merge → C=192 |
-| Stage 3 | Patch Merge → C=384 |
-| Stage 4 | Patch Merge → C=768 |
-| 输出维度 | 768 (after avg pool) |
-| 预训练 | 无 (from scratch, following paper) |
+| 输出维度 | 2048 (after avg pool) |
+| 预训练 | ImageNet-1k V2 |
+
+> **Note**: Mwinc-Mamba (Xu et al. 2025) is the reference SOTA for SF but its custom CUDA kernels (causal-conv1d, mamba-ssm) are not portable. ResNet-50 serves as a proxy backbone. The contribution is the loss function (EDL+ORCU), which is backbone-agnostic. Comparison between ResNet-50+CE and Mwinc-Mamba (66.67%) requires cautious interpretation; see Limitations (Section 6).
 
 ---
 
@@ -261,7 +259,7 @@ def total_loss(alpha, z, y, epoch, total_epochs, lambda_orcu=0.5, lambda_kl=0.1)
 MLTrMR (Xu 2025):        Mwinc-Mamba (Xu 2025):       Ours:
 ┌─────────────┐          ┌─────────────┐              ┌─────────────┐
 │ Latent Emb   │          │ CNN Branch   │              │ Backbone    │
-│ (CNN)        │          │ SSM Branch   │              │ (ViT/Mamba) │
+│ (CNN)        │          │ SSM Branch   │              │ (ViT/RN50)  │
 ├─────────────┤          ├─────────────┤              ├─────────────┤
 │ Encoder      │          │ Concat       │              │ Evidence    │
 │ (LT Blocks)  │          ├─────────────┤              │ Head        │

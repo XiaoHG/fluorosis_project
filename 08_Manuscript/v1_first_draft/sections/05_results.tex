@@ -1,0 +1,99 @@
+% ============================================================
+% Section 5: Results
+% ============================================================
+\section{Results}
+
+% [PLACEHOLDER: Values marked [X] require experimental data.
+%  All tables structured for expected results format.]
+
+\subsection{Main Results}
+
+\subsubsection{Dental Fluorosis (DF)}
+
+\begin{table}[htbp]
+\centering
+\caption{Main results on DF test set (n=60). Best in \textbf{bold}, second \underline{underlined}. $\dagger$: paper-reported.}
+\label{tab:df_main}
+\begin{tabular}{lccccccc}
+\toprule
+\textbf{Method} & \textbf{Acc $\uparrow$} & \textbf{F1 $\uparrow$} & \textbf{QWK $\uparrow$} & \textbf{ECE $\downarrow$} & \textbf{\%Uni $\uparrow$} & \textbf{U-ECE $\downarrow$} & \textbf{AUROC($u$) $\uparrow$} \\
+\midrule
+ViT-B + CE & [X] & [X] & [X] & [X] & [X] & [X] & -- \\
+MLTrMR$^\dagger$ \cite{xu2025mltrmr} & 80.19 & 75.79 & -- & -- & -- & -- & -- \\
+\midrule
+ViT-B + EDL Only & [X] & [X] & [X] & [X] & [X] & [X] & [X] \\
+ViT-B + ORCU Only & [X] & [X] & [X] & [X] & [X] & [X] & [X] \\
+ViT-B + EDL+ORCU (Ours) & [X] & [X] & [X] & [X] & [X] & [X] & [X] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Skeletal Fluorosis (SF)}
+
+\begin{table}[htbp]
+\centering
+\caption{Main results on SF test set (n=24).}
+\label{tab:sf_main}
+\begin{tabular}{lccccccc}
+\toprule
+\textbf{Method} & \textbf{Acc $\uparrow$} & \textbf{F1 $\uparrow$} & \textbf{QWK $\uparrow$} & \textbf{ECE $\downarrow$} & \textbf{\%Uni $\uparrow$} & \textbf{U-ECE $\downarrow$} & \textbf{AUROC($u$) $\uparrow$} \\
+\midrule
+ResNet-50 + CE & [X] & [X] & [X] & [X] & [X] & [X] & -- \\
+Mwinc-Mamba$^\dagger$ \cite{xu2025mwinc} & 66.67 & -- & -- & -- & -- & -- & -- \\
+5 Radiologists Avg$^\dagger$ & 70.00 & -- & -- & -- & -- & -- & -- \\
+\midrule
+ResNet-50 + EDL Only & [X] & [X] & [X] & [X] & [X] & [X] & [X] \\
+ResNet-50 + ORCU Only & [X] & [X] & [X] & [X] & [X] & [X] & [X] \\
+ResNet-50 + EDL+ORCU (Ours) & [X] & [X] & [X] & [X] & [X] & [X] & [X] \\
+ResNet-50 + EDL+ORCU + MR (Ours) & [X] & [X] & [X] & [X] & [X] & [X] & [X] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Ablation Results}
+
+\begin{table}[htbp]
+\centering
+\caption{Ablation study results.}
+\label{tab:ablation}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Variant} & \textbf{Acc} & \textbf{QWK} & \textbf{ECE} & \textbf{\%Uni} \\
+\midrule
+\multicolumn{5}{c}{\textit{DF (ViT-B)}} \\
+CE (baseline) & [X] & [X] & [X] & [X] \\
+EDL Only & [X] & [X] & [X] & [X] \\
+ORCU Only & [X] & [X] & [X] & [X] \\
+EDL+ORCU ($\lambda=0.5$) & [X] & [X] & [X] & [X] \\
+\midrule
+\multicolumn{5}{c}{\textit{A3: $\lambda$ sweep (DF)}} \\
+$\lambda=0.1$ & [X] & [X] & [X] & [X] \\
+$\lambda=0.3$ & [X] & [X] & [X] & [X] \\
+$\lambda=0.5$ (default) & [X] & [X] & [X] & [X] \\
+$\lambda=0.7$ & [X] & [X] & [X] & [X] \\
+$\lambda=1.0$ & [X] & [X] & [X] & [X] \\
+\midrule
+\multicolumn{5}{c}{\textit{A6: Label type (SF)}} \\
+One-hot majority vote & [X] & [X] & [X] & [X] \\
+Multi-rater soft label & [X] & [X] & [X] & [X] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Uncertainty Analysis}
+
+\textbf{Evidence per class (U1):} [Expected: Moderate/Severe classes show lower evidence due to fewer samples, especially SF.]
+
+\textbf{Uncertainty vs error (U2):} AUROC of $u$ for misclassification: DF=[X], SF=[X].
+
+\textbf{OOD detection (U3):} [Expected: EDL assigns significantly higher $u$ to OOD samples.]
+
+\textbf{Uncertainty by body part (U4, SF):} [Expected: Pelvis views show highest $u$.]
+
+\textbf{Rater agreement vs uncertainty (U5):} Spearman correlation between inter-rater entropy and model $u$: [X] ($p$=[X]).
+
+\textbf{RecAcc \& SafePred (U6):} At $\theta=0.30$, [X]\% flagged for review (RecAcc=[X]\%), [X]\% safe (SafePred=[X]\%).
+
+\subsection{Clinical Report Generation}
+
+Example auto-generated diagnosis reports for representative DF/SF cases are shown in the supplementary material. The reports, produced from EDL outputs without additional training, include predicted grade, confidence, uncertainty level, per-class evidence, and clinical recommendations stratified by uncertainty.

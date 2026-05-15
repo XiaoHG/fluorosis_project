@@ -1,0 +1,62 @@
+# DF (Dental Fluorosis) — ViT-Base + EDL + ORCU
+# Dataset: 200 intraoral photos, 4-class balanced, 50/class
+# Competitor baseline: MLTrMR 80.19% Acc (paper-reported)
+
+task: df
+data_root: "../.."
+
+data:
+  num_classes: 4
+  input_size: 224
+  train_split: 0.60  # 120 samples
+  val_split: 0.10    # 20 samples
+  test_split: 0.30   # 60 samples
+
+model:
+  backbone: vit_base
+  pretrained: true
+  freeze_backbone: false
+  dim: 768
+  num_classes: 4
+  dropout: 0.1
+
+training:
+  batch_size: 32
+  epochs: 100
+  num_workers: 4
+
+optimizer:
+  name: adamw
+  lr_backbone: 1.0e-4
+  lr_head: 1.0e-3
+  weight_decay: 0.05
+
+scheduler:
+  warmup_epochs: 5
+  name: cosine
+
+loss:
+  lambda_orcu: 0.5
+  lambda_kl: 0.1
+  orcu_t: 3.0
+
+stages:
+  stage_1_epochs: 5    # CE warmup
+  stage_2_epochs: 30   # EDL only
+
+augmentation:
+  random_resized_crop:
+    scale: [0.8, 1.0]
+  random_horizontal_flip:
+    p: 0.5
+  random_rotation:
+    degrees: 10
+  color_jitter:
+    brightness: 0.2
+    contrast: 0.2
+
+ablation:
+  use_edl: true
+  use_orcu: true
+  use_kl_annealing: true
+  use_sord_encoding: true

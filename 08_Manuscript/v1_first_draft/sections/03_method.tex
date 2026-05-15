@@ -1,0 +1,88 @@
+% ============================================================
+% Section 3: Method
+% ============================================================
+\section{Method}
+
+\subsection{Overview}
+
+Our framework consists of three components: (1) a task-specific backbone for feature extraction, (2) a shared evidence head outputting logits $z \in \mathbb{R}^K$ for $K = 4$ classes, and (3) a joint loss combining evidential learning and ordinal calibration. The architecture is backbone-agnostic: ViT-Base \cite{dosovitskiy2020vit} for DF (ImageNet-21k pretrained) and ResNet-50 \cite{he2016resnet} for SF (ImageNet-1k pretrained).
+
+\subsection{Evidence Head: Shared-Logit Bridge}
+
+The evidence head replaces the standard classifier and produces logits $z$ serving both EDL and ORCU paths:
+
+\begin{equation}
+    z = \mathbf{W} \cdot \text{Dropout}(f) + \mathbf{b}, \quad \mathbf{W} \in \mathbb{R}^{D \times K}
+\end{equation}
+
+where $f \in \mathbb{R}^D$ is the backbone feature (768-dim for ViT, 2048-dim for ResNet-50).
+
+From $z$, two paths diverge:
+
+\textbf{EDL path:} Dirichlet parameters via softplus with unit shift ($\alpha_k > 1$):
+\begin{equation}
+    \alpha_k = \text{softplus}(z_k) + 1
+\end{equation}
+From $\alpha$: $S = \sum_k \alpha_k$, $p_k = \alpha_k / S$, $e_k = \alpha_k - 1$, $u = K / S \in (0, 1)$.
+
+\textbf{ORCU path:} Probabilities via softmax on the same logits:
+\begin{equation}
+    p_k = \frac{\exp(z_k)}{\sum_j \exp(z_j)}
+\end{equation}
+Ordinal constraints applied directly on logit differences $r_k = z_k - z_{k+1}$.
+
+\subsection{Loss Function}
+
+\subsubsection{$L_{\text{EDL}}$: Evidential Loss}
+
+Type II MLE plus KL regularizer with annealing \cite{sensoy2018edl}:
+\begin{equation}
+    L_{\text{EDL}} = \sum_{k} y_k \big(\psi(S) - \psi(\alpha_k)\big) + \lambda_{\text{KL}} \cdot t \cdot \text{KL}\big(\text{Dir}(\tilde{\alpha}) \| \text{Dir}(\mathbf{1})\big)
+\end{equation}
+where $\psi(\cdot)$ is the digamma function, $\tilde{\alpha}_k = y_k + (1 - y_k) \alpha_k$ removes misleading evidence, $t = \min(1.0, \text{epoch} / (0.3 \cdot T_{\text{total}}))$ linearly anneals the KL term, and $\lambda_{\text{KL}} = 0.1$.
+
+\subsubsection{$L_{\text{ORCU}}$: Ordinal Calibration Loss}
+
+\textbf{SORD Encoding:} Soft targets from squared ordinal distance:
+\begin{equation}
+    y^{\text{SORD}}_k = \text{softmax}\big(-(k - y)^2\big), \quad L_{\text{SCE}} = -\sum_k y^{\text{SORD}}_k \log p_k
+\end{equation}
+
+\textbf{Log-Barrier Regularization:} For each adjacent pair $(k, k+1)$, $r_k = z_k - z_{k+1}$:
+\begin{equation}
+    I(r_k) = \begin{cases}
+        -\frac{1}{\tau} \log(-r_k), & r_k \leq -\frac{1}{\tau^2} \\[4pt]
+        \tau r_k - \frac{1}{\tau} \log\left(\frac{1}{\tau^2}\right) + \tau, & \text{otherwise}
+    \end{cases}
+\end{equation}
+with $\tau = 3.0$. The total regularization:
+\begin{equation}
+    L_{\text{REG}} = \frac{1}{B(K-1)} \sum_{b=1}^{B} \sum_{k=0}^{K-2} \mathbb{1}[y > k] \cdot I(r_k^{(b)}) + \mathbb{1}[y \leq k] \cdot I(r_k^{(b)})
+\end{equation}
+
+$L_{\text{ORCU}} = L_{\text{SCE}} + L_{\text{REG}}$.
+
+\subsubsection{Total Loss and Training Strategy}
+
+\begin{equation}
+    L_{\text{total}} = L_{\text{EDL}} + \lambda \cdot L_{\text{ORCU}}
+\end{equation}
+
+Three-stage training:
+\begin{enumerate}
+    \item \textbf{Stage 1 (CE warmup):} Cross-entropy on $z$, DF: 5 epochs, SF: 10 epochs.
+    \item \textbf{Stage 2 (EDL only):} $L_{\text{EDL}}$ with KL annealing. DF: 30 epochs, SF: 45 epochs.
+    \item \textbf{Stage 3 (Joint):} $L_{\text{EDL}} + \lambda L_{\text{ORCU}}$, $\lambda$ annealed from 0 to 0.5 over first half of stage.
+\end{enumerate}
+
+\subsection{Multi-Rater Soft Labels (SF Only)}
+
+For SF images with 5-radiologist annotation counts $[c_0, c_1, c_2, c_3]$:
+\begin{equation}
+    y^{\text{multi}}_k = c_k / 5
+\end{equation}
+Example: 1 Mild + 3 Moderate + 1 Severe $\to$ $y^{\text{multi}} = [0, 0.2, 0.6, 0.2]$. For DF (single-rater), standard SORD encoding is used.
+
+\subsection{Training Details}
+
+AdamW optimizer: $\text{lr}_{\text{backbone}} = 10^{-4}$, $\text{lr}_{\text{head}} = 10^{-3}$, weight decay 0.05. LR schedule: linear warmup (5/10 epochs DF/SF) + cosine annealing. Batch sizes: 32 (DF), 16 (SF). Epochs: 100 (DF), 150 (SF). Augmentation: random resized crop (0.8--1.0), horizontal flip ($p=0.5$), rotation ($\pm 10^\circ$), color jitter (DF only, 0.2). Images resized to $224 \times 224$, ImageNet normalization.
