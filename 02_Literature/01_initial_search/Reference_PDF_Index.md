@@ -16,22 +16,22 @@ status: draft
 
 | 类别 | 数量 | 高相关 (≥⭐⭐⭐) | 精读优先级 |
 |------|------|------------------|------------|
-| A — 氟中毒直接相关 | 29 | 17 | **Tier 1: 6 (+2 NEW 2025)**, Tier 2: 2 |
+| A — 氟中毒直接相关 | 30 | 18 | **Tier 1: 7 (+3 NEW 2025-26)**, Tier 2: 2 |
 | B — 证据深度学习 (EDL) | 10 | 10 | Tier 1: 4, Tier 2: 2 |
 | C — DL 医学图像分割 | 15 | 8 | Tier 2: 2 |
 | D — 多模态融合 | 5 | 4 | Tier 2: 1 |
 | E — 牙科/口腔影像 DL | 12 | 6 | Tier 1: 1 |
 | F — 骨病变/骨质疏松 DL | 10 | 5 | Tier 1: 1 |
 | G — 大型教科书（参考） | 3 | — | 不精读 |
-| H — 低相关（拟排除） | 18 | 0 | 排除 |
+| H — 低相关（拟排除） | 17 | 0 | 排除 |
 | U — 未分类（待确认） | 21 | — | 待确认 |
-| **合计** | **134** | | **精读: 19 (15 original + 4 NEW), 排除: 18** |
+| **合计** | **134** | | **精读: 20 (15 original + 5 NEW), 排除: 17** |
 
 ---
 
 ## A. 氟中毒直接相关（25 篇）
 
-### A1. 氟斑牙 DL/图像分析（6 篇）
+### A1. 氟斑牙 DL/图像分析（7 篇）
 
 | # | 文件名 | 大小 | 推断主题 | 相关度 | 精读 |
 |---|--------|------|----------|--------|------|
@@ -42,6 +42,7 @@ status: draft
 | A1-5 | `The_Nature_and_Mechanisms_of_Dental_Fluorosis_in_Man.pdf` | 2MB | Fejerskov 氟斑牙病理机制经典文献 | ⭐⭐⭐⭐⭐ | **Tier 1** |
 | A1-6 | `10.1177_0022034510384626.pdf` | 298KB | J Dental Research 氟斑牙研究 | ⭐⭐⭐ | — |
 | A1-7 | `Xu 等 - 2025 - Masked latent transformer with random masking ratio to advance the diagnosis of dental fluorosis.pdf` | — | **NEW!** MLTrMR — 首个开源 DF 数据集 (DFID: 200 images) + ViT 掩码潜变换器, Acc=80.19%, QWK=81.28%. 贵州大学 Wu 组 | ⭐⭐⭐⭐⭐ | **Tier 1** |
+| A1-8 | `s11554-026-01874-4.pdf` | 2.9MB | **NEW!** LD2Net (Li/Wu 2026, JRTIP) — 轻量级 DF 分级, depthwise separable convolution + dual-axis attention, Acc=80.00%/F1=79.88%, 仅 3.31M 参数. 同课题组 (贵州大学 Wu 组), 同 DFID 数据集. 原 H-17 误分类 | ⭐⭐⭐⭐⭐ | **Tier 1** |
 | A1-D1 | `Ahmed 等 - 2024 - Dental Fluorosis Analysis A Web-Based Dental Fluorosis Severity Detection.pdf` | 1.9MB | ⚠️ 与 A1-1 重复（中文命名版本） | — | — |
 
 ### A2. 氟骨症 DL/诊断（10 篇）
@@ -184,7 +185,7 @@ status: draft
 
 ---
 
-## H. 低相关 / 拟排除（18 篇）
+## H. 低相关 / 拟排除（17 篇）
 
 | # | 文件名 | 排除原因 |
 |---|--------|----------|
@@ -204,8 +205,7 @@ status: draft
 | H-14 | `HTL.2017.0066.pdf` | 非氟中毒影像 |
 | H-15 | `s42452-024-06127-2.pdf` | 非核心领域 |
 | H-16 | `sustainability-15-12227.pdf` | 可持续发展，不相关 |
-| H-17 | `s11554-026-01874-4.pdf` | 非核心领域 |
-| H-18 | `Tian_2025_Biomed._Phys._Eng._Express_11_065019.pdf` | 非核心领域 |
+| H-17 | `Tian_2025_Biomed._Phys._Eng._Express_11_065019.pdf` | 非核心领域 |
 
 ---
 
@@ -241,22 +241,24 @@ status: draft
 
 ## 精读优先级汇总
 
-### Tier 1 — 必读（10 篇）
+### Tier 1 — 必读（11 篇）
 
 | # | Ref ID | 标题关键词 | 入选理由 |
 |---|--------|-----------|----------|
 | 1 | A2-1 | Integrated Learning SF Diagnosis | 首个 SF DL 分级论文 (2021, IEEE TII) |
 | **2** | **A2-9** | **Mwinc-Mamba SF Diagnosis (BSPC 2025)** | **🆕 SOTA SF 诊断！首个开源 SFXRay 数据集 + SSM** |
 | **3** | **A1-7** | **MLTrMR DF Diagnosis (JVCIR 2025)** | **🆕 SOTA DF 诊断！首个开源 DFID 数据集 + ViT 掩码** |
-| 4 | A1-1 | Dental Fluorosis Web Detection | DF DL 检测 Web 系统 |
+| **4** | **A1-8** | **LD2Net DF Grading (JRTIP 2026)** | **🆕 轻量级 DF 诊断 (3.31M 参数), Acc=80.00%/F1=79.88%. 同 DFID 数据集, 同 Wu 组** |
+| 5 | A1-1 | Dental Fluorosis Web Detection | DF DL 检测 Web 系统 |
 | 5 | A1-4 | Differential Diagnosis of DF | 氟斑牙鉴别诊断标准 |
 | 6 | A1-5 | Nature & Mechanisms of DF (Fejerskov) | 氟斑牙病理机制经典 |
 | 7 | B-1 | MEDL Mutual Evidential DL | EDL 最新方法（2025） |
 | 8 | B-2 | ORCU Ordinal Calibration | 有序回归 EDL — 与 Dean Index 天然匹配 |
 | 9 | B-3 | EviVLM EDL + VLM | EDL 多模态融合前沿 |
 | 10 | B-4 | REDNet Evidential Discounting | 多模态不确定性融合 |
+| 11 | F-1 | Few-Shot Osteopenia Knee X-ray | 小样本骨病分类 — 与 SF 场景高度相似 |
 
-### Tier 2 — 应读（7 篇）
+### Tier 2 — 应读（6 篇）
 
 | # | Ref ID | 标题关键词 | 入选理由 |
 |---|--------|-----------|----------|
@@ -266,8 +268,7 @@ status: draft
 | 12 | B-6 | DuEDL Scribble Segmentation | 弱监督 EDL 方法 |
 | 13 | D-1 | HyperDense-Net Multimodal | 多模态融合架构经典 |
 | 14 | E-1 | DL Dental Image Survey | 牙科 DL 全景综述 |
-| 15 | F-1 | Few-Shot Osteopenia Knee X-ray | 小样本骨病分类 — 与 SF 场景高度相似 |
 
 ---
 
-> **2026-05-15 更新**：Phase 2 精读已完成（19 篇深读摘要，含 4 篇新增）。2025 年 Xu/Wu (贵州大学) 的 Mwinc-Mamba (SF) 和 MLTrMR (DF) 是最直接的 SOTA 竞品——均构建了世界首个开源数据集，是本项目必须超越的基线。见 `02_Literature/02_deep_read/16-19`。
+> **2026-05-17 更新**：Phase 2 精读已完成（20 篇深读摘要，含 5 篇新增）。贵州大学 Wu 组的 MLTrMR (DF, JVCIR 2025) 和 LD2Net (DF, JRTIP 2026) 均使用 DFID 数据集 (200 张, 50/class), 是本项目最直接的 SOTA 竞品。Mwinc-Mamba (SF, BSPC 2025) 是 SF 竞品。见 `02_Literature/02_deep_read/16-19`。

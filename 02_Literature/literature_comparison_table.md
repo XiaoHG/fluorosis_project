@@ -12,6 +12,7 @@ status: final
 | # | Paper | Task | Method | Dataset | SOTA | Key Gap | 对我们的价值 |
 |---|-------|------|--------|---------|------|---------|------------|
 | 17 | Xu 2025 MLTrMR (JCVI) | DF 4-grade | Masked Latent Transformer + random masking | DFID 200 (50/class) | 80.19% Acc | 无 EDL, 无 ordinal loss, Mild-Moderate 边界最差 | **必须超越的 SOTA baseline** |
+| 18 | Li 2026 LD2Net (JRTIP) | DF 4-grade | Depthwise separable conv + dual-axis attention | DFID 200 (50/class) | 80.00% Acc / 3.31M params | 轻量化方向, 无不确定性, 无 ordinal | **轻量级 SOTA, 不同方向可互补引用** |
 | 16 | Xu 2025 Mwinc-Mamba (BSPC) | SF 4-grade | CNN+SSM dual-branch + MWCS | SFXRay 80 (N21/M34/Mo13/S12) | 66.67% Acc | 无 EDL, 仅 CE loss, 比放射科医生低 3.33% | **SF SOTA baseline, 放射科医生一致性差 → EDL 动机** |
 | 01 | Liu 2021 SF Integrated (IEEE TII) | SF binary/multi | CNN ensemble (ResNet+DenseNet) | Private 128 (forearm only) | 82.8% binary | 私密数据, 仅前臂, 纯 CNN | 早期 baseline, 方法已被超越 |
 
