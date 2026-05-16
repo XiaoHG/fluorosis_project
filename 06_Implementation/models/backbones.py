@@ -47,8 +47,24 @@ class ResNetBackbone(nn.Module):
         return self.resnet(x)
 
 
+class StandardClassifier(nn.Module):
+    """Backbone + standard FC head for CE / SORD modes (no EDL alpha)."""
+
+    def __init__(self, backbone: nn.Module, num_classes: int = 4, dropout: float = 0.1):
+        super().__init__()
+        self.backbone = backbone
+        self.dropout = nn.Dropout(dropout)
+        self.fc = nn.Linear(backbone.dim, num_classes)
+
+    def forward(self, x):
+        features = self.backbone(x)
+        features = self.dropout(features)
+        z = self.fc(features)
+        return None, z
+
+
 class EDLClassifier(nn.Module):
-    """Full model: Backbone + Evidence Head (for CE / EDL / ORCU / EDL+ORCU modes)."""
+    """Backbone + Evidence Head for EDL / EDL+ORCU modes."""
 
     def __init__(self, backbone: nn.Module, num_classes: int = 4, dropout: float = 0.1):
         super().__init__()
@@ -105,7 +121,9 @@ def build_model(task: str = "df", mode: str = "edl_orcu", pretrained: bool = Tru
     else:
         backbone = ResNetBackbone(pretrained=pretrained)
 
-    if mode == "cumulative":
+    if mode in ("ce", "sord"):
+        return StandardClassifier(backbone)
+    elif mode == "cumulative":
         return CumulativeClassifier(backbone)
-    else:
+    else:  # edl, edl_orcu, orcu
         return EDLClassifier(backbone)
