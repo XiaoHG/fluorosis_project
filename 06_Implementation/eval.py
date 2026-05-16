@@ -10,7 +10,7 @@ import numpy as np
 from sklearn.metrics import cohen_kappa_score, roc_auc_score
 
 
-def compute_metrics(alpha, z, targets, num_bins=15):
+def compute_metrics(alpha, z, targets, num_bins=15, temperature=1.0):
     """Compute all evaluation metrics.
 
     Args:
@@ -18,9 +18,11 @@ def compute_metrics(alpha, z, targets, num_bins=15):
         z: logits (N, K) — always K-class logits for eval compatibility
         targets: integer labels (N,)
         num_bins: bins for ECE / U-ECE
+        temperature: temperature scaling for confidence calibration (default 1.0 = no scaling)
     """
     K = z.shape[-1]
-    probs = F.softmax(z, dim=-1)
+    z_scaled = z / temperature
+    probs = F.softmax(z_scaled, dim=-1)
     preds = torch.argmax(probs, dim=-1)
 
     # EDL-specific: uncertainty from Dirichlet concentration
@@ -66,6 +68,11 @@ def compute_metrics(alpha, z, targets, num_bins=15):
             if mask.sum() > 0:
                 class_evidence[f"evidence_class_{k}"] = evidence_np[mask, k].mean().item()
 
+    # Confusion matrix
+    cm = np.zeros((K, K), dtype=np.int64)
+    for t, p in zip(y_true, y_pred):
+        cm[t, p] += 1
+
     return {
         "acc": acc,
         "macro_f1": f1,
@@ -77,6 +84,7 @@ def compute_metrics(alpha, z, targets, num_bins=15):
         "auroc_u": auroc_u,
         "mean_uncertainty": u_np.mean().item(),
         "mean_evidence": evidence_np.sum(axis=1).mean().item() if alpha is not None else 0.0,
+        "confusion_matrix": cm.tolist(),
         **class_evidence,
     }
 

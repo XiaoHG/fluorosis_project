@@ -37,7 +37,7 @@ def parse_args():
     p.add_argument("--lambda_orcu", type=float, default=0.5)
     p.add_argument("--lambda_kl", type=float, default=0.1)
     p.add_argument("--orcu_t", type=float, default=3.0)
-    p.add_argument("--orcu_lambda_reg", type=float, default=0.05,
+    p.add_argument("--orcu_lambda_reg", type=float, default=0.01,
                    help="Weight for ORCU hinge ordinal regularization")
     p.add_argument("--stage_1_epochs", type=int, default=None)
     p.add_argument("--stage_2_epochs", type=int, default=None)

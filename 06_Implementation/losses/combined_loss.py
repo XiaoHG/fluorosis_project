@@ -22,7 +22,7 @@ class CombinedLoss(nn.Module):
         lambda_orcu: float = 0.5,
         lambda_kl: float = 0.1,
         orcu_t: float = 3.0,
-        orcu_lambda_reg: float = 0.05,
+        orcu_lambda_reg: float = 0.01,
         stage_1_epochs: int = 5,
         stage_2_epochs: int = 30,
         total_epochs: int = 100,
