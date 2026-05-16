@@ -2,7 +2,7 @@
 ORCU Loss: Ordinal Regression for Calibration and Unimodality.
 
 Based on Kim et al. (MedIA 2025).
-L_ORCU = L_SCE (SORD soft-encoded CE) + L_REG (log-barrier ordinal regularization)
+L_ORCU = L_SCE (SORD soft-encoded CE) + lambda_reg * L_REG (hinge ordinal regularization)
 """
 import torch
 import torch.nn as nn
@@ -20,41 +20,42 @@ def compute_sord_encoding(targets, num_classes):
 
 
 class ORCULoss(nn.Module):
-    """ORCU loss: L_SCE + L_REG."""
+    """ORCU loss: L_SCE + lambda_reg * L_REG."""
 
-    def __init__(self, num_classes: int = 4, t: float = 3.0):
+    def __init__(self, num_classes: int = 4, t: float = 3.0, lambda_reg: float = 0.05):
         super().__init__()
         self.num_classes = num_classes
         self.t = t
+        self.lambda_reg = lambda_reg
 
     def forward(self, z, targets):
         K = z.shape[-1]
         B = z.shape[0]
 
+        # SORD soft-encoded cross-entropy
         y_sord = compute_sord_encoding(targets, K)
         log_probs = F.log_softmax(z, dim=-1)
         L_sce = -(y_sord * log_probs).sum(dim=-1).mean()
 
+        # Hinge ordinal regularization: penalize violations of unimodal ordering.
+        # For target class c:
+        #   k < c  (mask_below):   want z[k] < z[k+1] => r_k < 0
+        #   k >= c (mask_at_above): want z[k] > z[k+1] => r_k > 0
         reg = torch.tensor(0.0, device=z.device)
-        threshold = -1.0 / (self.t ** 2)
-
         for k in range(K - 1):
-            r_k = z[:, k] - z[:, k + 1]
-            mask_below = (targets > k).float()
-            mask_at_above = (targets <= k).float()
-            linear_val = self.t * r_k - (1.0 / self.t) * torch.log(
-                torch.tensor(1.0 / (self.t ** 2) + 1e-8, device=z.device)
-            ) + self.t
-            penalty = torch.where(
-                r_k <= threshold,
-                -(1.0 / self.t) * torch.log(-r_k + 1e-8),
-                linear_val,
-            )
-            reg += (mask_below * penalty).sum()
-            reg += (mask_at_above * penalty).sum()
+            r_k = z[:, k] - z[:, k + 1]                     # (B,)
+
+            mask_below = (targets > k).float()               # want r_k < 0
+            mask_at_above = (targets <= k).float()           # want r_k > 0
+
+            violation_below = F.relu(r_k)                    # >0 when r_k >= 0 (wrong)
+            violation_above = F.relu(-r_k)                   # >0 when r_k <= 0 (wrong)
+
+            reg += (mask_below * violation_below).sum()
+            reg += (mask_at_above * violation_above).sum()
 
         L_reg = reg / (B * (K - 1))
-        return L_sce + L_reg
+        return L_sce + self.lambda_reg * L_reg
 
 
 def check_unimodality(probs):
