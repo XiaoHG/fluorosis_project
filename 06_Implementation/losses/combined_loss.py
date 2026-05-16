@@ -22,6 +22,7 @@ class CombinedLoss(nn.Module):
         lambda_orcu: float = 0.5,
         lambda_kl: float = 0.1,
         orcu_t: float = 3.0,
+        orcu_lambda_reg: float = 0.05,
         stage_1_epochs: int = 5,
         stage_2_epochs: int = 30,
         total_epochs: int = 100,
@@ -34,7 +35,7 @@ class CombinedLoss(nn.Module):
         self.total_epochs = total_epochs
 
         self.edl_loss = EDLLoss(num_classes=num_classes, kl_lambda=lambda_kl)
-        self.orcu_loss = ORCULoss(num_classes=num_classes, t=orcu_t)
+        self.orcu_loss = ORCULoss(num_classes=num_classes, t=orcu_t, lambda_reg=orcu_lambda_reg)
 
     def get_stage(self, epoch):
         if epoch < self.stage_1_epochs:

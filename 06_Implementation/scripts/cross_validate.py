@@ -91,7 +91,7 @@ def train_one_fold(args, fold, train_indices, val_indices, device):
         criterion = EDLWrapper()
     elif args.mode == "orcu":
         from losses.orcu_loss import ORCULoss
-        orcu = ORCULoss(num_classes=4, t=args.orcu_t)
+        orcu = ORCULoss(num_classes=4, t=args.orcu_t, lambda_reg=args.orcu_lambda_reg)
         class ORCUWrapper(nn.Module):
             def forward(self, alpha, z, targets, epoch=None):
                 loss = orcu(z, targets)
