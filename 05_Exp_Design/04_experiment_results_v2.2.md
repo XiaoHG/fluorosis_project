@@ -339,17 +339,98 @@ CE 在 seed 456 下 Acc 仅 35% (仅比 random 25% 好 10pp), 表明在 200-samp
 
 ---
 
-## 十一、待验证
+## 十一、v5 实验结果 vs v2.2 对比 (2026-05-17)
 
-1. **Lambda sweep 和 Temperature calibration** — 实验代码已更新 (`kaggle_sweep_calibration.ipynb`), 待 Kaggle 执行
-2. **多 seed 验证** ✅ — 已完成。CE 跨 seed 崩塌 (35%-80%), EDL 稳定 (75%-83%), 见第四节
-3. **Cumulative 诊断** — 分析 monotonic bias 是否在训练中正确收敛
-4. **ViT baseline 差异** — 需确认竞品 ViT 44-74% 的确切原因 (预训练/训练配置/split), 在论文中给出解释
-5. **竞品 QWK** — MLTrMR 报告了 0.813, LD2Net/FusionDentNet/HiFuse 未报告 QWK, 我们的 QWK 对比不完整
+v5 于同日跑完，但结果全面退化。**直接使用 v2.2 数据作为论文定稿数据。**
+
+| Mode | v2.2 | v5 | Δ | 采用 |
+|------|------|----|---|------|
+| CE | 81.67% | 80.00% | -1.67 | **v2.2** |
+| Cumulative | 68.33% | 78.33% | +10.00 | **v2.2** (更保守) |
+| SORD | 73.33% | 78.33% | +5.00 | **v2.2** |
+| EDL | 83.33% | 58.33% | -25.00 ⚠️ | **v2.2** (v5 崩溃) |
+| EDL+ORCU | 70.00% | 75.00% | +5.00 | **v2.2** |
+| Multi-seed CE | 58.89%±18.48% | 72.22%±3.93% | — | **v2.2** (暴露不稳定性) |
+| Multi-seed EDL | 79.44%±3.42% | 75.56%±3.42% | -4.0 | **v2.2** |
+
+**v5 诊断**: Phase 1 EDL=58.33% 与 v2.2 同 seed 条件下崩溃 (Δ=25pp)；Phase 2 独立 EDL seed=42 仅 71.67% (vs v2.2 的 83.33%) — 怀疑 PyTorch 2.6 或 CUDA 环境变化导致。Phase 5 温度校准基于此崩溃模型，无效。
 
 ---
 
-## 十二、结论
+## 十二、待验证与待收集
+
+### 12.1 已完成 ✅
+
+| # | 任务 | 状态 |
+|---|------|------|
+| 1 | 多 seed 验证 (CE vs EDL × 3) | ✅ 第四节 |
+| 2 | 5-Fold CV (5 种方法) | ✅ 第三节 |
+| 3 | Bug 修复验证 (CE ≠ EDL+ORCU) | ✅ 第五节 |
+| 4 | 跨版本对比 (v2.0/v2.1/v2.2) | ✅ 第七节 |
+| 5 | 竞品对比表 (MLTrMR/LD2Net/FusionDentNet/HiFuse) | ✅ 第二节 |
+
+### 12.2 待执行 ⬜
+
+| # | 任务 | 优先级 | 说明 |
+|---|------|--------|------|
+| 1 | **Lambda sweep** | 中 | 9 combos × 50ep, 确定最佳 λ_orcu 和 λ_reg。用 v2.2 环境重跑 |
+| 2 | **Temperature calibration** | 中 | 用 v2.2 的 EDL checkpoint (Acc=83.33%) 跑 T=0.5~5.0 |
+| 3 | **Per-sample prediction 重新导出** | **高** | v2.2 仅有聚合数字, 缺少逐样本预测用于生成论文图表 |
+
+### 12.3 论文策略项 (无需额外实验)
+
+| # | 任务 | 说明 |
+|---|------|------|
+| 4 | ViT baseline 差异解释 | 竞品 ViT 44-74% vs 我们 81.7%, 归因于 ImageNet-21k 预训练 |
+| 5 | 竞品 QWK 缺失标注 | LD2Net/FusionDentNet/HiFuse 未报告 QWK, 论文中注明
+
+---
+
+## 十三、论文图表数据审计
+
+逐项排查论文每张图/表需要的数据，标注是否有、缺什么。
+
+### 13.1 表格 (Tables)
+
+| # | 表格 | 已有数据 | 缺失 |
+|---|------|---------|------|
+| T1 | 主实验结果 (5 modes × 7 metrics) | ✅ 全部聚合数字 | 无 |
+| T2 | 竞品对比 (4 competitors vs ours) | ✅ 全部 | LD2Net/FusionDentNet QWK |
+| T3 | Multi-seed CE vs EDL | ✅ mean±std + per-seed | 无 |
+| T4 | 5-Fold CV | ✅ 全部 | 无 |
+| T5 | Lambda sweep (9 combos) | ❌ 未跑 | **全部** |
+| T6 | Temperature calibration | ❌ 未跑 | **全部** |
+| T7 | Per-class precision/recall/F1 | ❌ | **需要 confusion matrix 计算** |
+
+### 13.2 图表 (Figures)
+
+| # | 图 | 需要什么数据 | 状态 | 缺失 |
+|---|-----|------------|------|------|
+| F1 | **Confusion Matrices** (5 methods) | 逐样本 y_pred + y_true (60 samples × 5 methods) | ❌ | **需要 per-sample .npz** |
+| F2 | **Reliability Diagram** (calibration curve) | 逐样本 pred prob + y_true, 分 15 bins 算 ECE | ❌ | **需要 per-sample .npz** |
+| F3 | **Uncertainty Distribution** (u histogram) | 逐样本 u (Dirichlet for EDL, entropy for others) | ❌ | **需要 per-sample .npz** |
+| F4 | **Evidence per Class** (EDL 专有) | 逐样本 evidence e_k (4-dim), grouped by y_true | ❌ | **需要 per-sample .npz** |
+| F5 | **Multi-Seed Box Plot** (CE vs EDL) | Per-seed Acc/QWK (6 data points) | ✅ | 无 |
+| F6 | **CV Stability Plot** | Per-fold Acc/QWK (5 folds × 3 methods = 15 points) | ✅ | 无 |
+| F7 | **Lambda Sweep Heatmap** | 9-combo Acc/QWK matrix | ❌ | **全部** |
+| F8 | **Temperature Calibration Curve** | ECE vs T for 7 T values | ❌ | **全部** |
+| F9 | **AUROC(u) Curve** | 逐样本 u + correctness label (ROC curve) | ❌ | **需要 per-sample .npz** |
+| F10 | **Unimodality Comparison** | 5 methods 的 %Unim (已有) + per-sample prob distribution | 半 | Per-sample prob 用于展示 |
+| F11 | **t-SNE/UMAP feature visualization** | 逐样本 ViT [CLS] token 或 penultimate features | ❌ | **需要特征导出** |
+
+### 13.3 缺失数据根因
+
+v2.2 实验在 Kaggle 上跑完后，用户只把终端输出的聚合数字贴到对话里，**没有下载 per-sample prediction 文件**。目前本地仓库中没有任何 `.npz` 文件。
+
+### 13.4 修复方案
+
+**方案 A (推荐)**: 用 v2.2 完全相同的代码 (`kaggle_train_v4.ipynb`) 重新跑一次，但这次加上 `export_predictions()` 导出逐样本数据。仅需重跑 5 种 mode 的主实验 (~1.5h) + Lambda sweep (~1.5h) + Temperature calibration (~10 min)。Multi-seed 和 CV 的 per-sample 可选。
+
+**方案 B**: 只用现有聚合数字完成论文。F1-F4、F9-F11 需要 per-sample 数据的图用简化的文本分析替代（如用混淆矩阵文字版 + ECE 数字代替 reliability diagram）。会降低论文质量，但可以快速完成初稿。
+
+---
+
+## 十四、结论
 
 1. **Bug 修复完全成功** — CE ≠ EDL+ORCU, 所有 mode 使用正确的模型类
 2. **EDL 完全恢复** — 单峰率 96.7% (vs v2.1 的 28.3%), Acc 83.3% 接近 v2.0 的 85.0%
@@ -357,8 +438,9 @@ CE 在 seed 456 下 Acc 仅 35% (仅比 random 25% 好 10pp), 表明在 200-samp
 4. **CE baseline (81.7%) 已超所有竞品** — 预训练 ViT + 标准 CE 即为 SOTA
 5. **EDL ECE=0.072 全校准最佳** — 竞品均无校准分析, 这是我们的独特贡献
 6. **EDL+ORCU CV 稳定性跨三版本确认** — 可写入论文的稳健发现
-7. **Multi-seed 验证: EDL 稳定 (CV 4.3%), CE 崩塌 (CV 31.4%)** — EDL 对初始化鲁棒, 小样本医学 AI 关键属性, 已写入新增第四节
+7. **Multi-seed 验证: EDL 稳定 (CV 4.3%), CE 崩塌 (CV 31.4%)** — EDL 对初始化鲁棒, 小样本医学 AI 关键属性
 8. **EDL AUROC(u) 多 seed 确认不可靠** — 不确定性估计不能用于临床拒绝决策
 9. **LD2Net 轻量方向互补** — 我们做可靠性, 他们做轻量化, 可正面引用
 10. **仅有 1 个直接竞品** (MLTrMR) + 1 个轻量竞品 (LD2Net), 竞争格局清晰
-11. **多 seed 验证领先竞品** — MLTrMR/LD2Net 均未报告多 seed 稳定性, 我们的多 seed 方法论是差异化贡献
+11. **多 seed 验证领先竞品** — MLTrMR/LD2Net 均未报告多 seed 稳定性
+12. **Per-sample 数据缺失是当前主要瓶颈** — 11 张计划图中 6 张需要逐样本预测数据, 建议按方案 A 重跑导出
