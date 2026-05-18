@@ -19,7 +19,7 @@ We compare five loss configurations, all using the same ViT-Base backbone:
 
 \begin{itemize}
     \item \textbf{CE:} Standard cross-entropy loss with one-hot encoded targets. Baseline representing the de facto standard in medical image classification.
-    \item \textbf{Cumulative:} Ordinal regression via cumulative link model with threshold-based probability estimation. $P(y \leq k) = \sigma(\theta_k - z)$, where $\theta_k$ are learnable thresholds.
+    \item \textbf{Cumulative:} Ordinal regression via cumulative link model, $P(y \leq k) = \sigma(\theta_k - z)$, with learnable thresholds $\theta_k$.
     \item \textbf{SORD:} Soft-Encoded Ordinal Regression using squared distance soft labels $y^{\text{SORD}}_k = \text{softmax}(-(k - y)^2)$ with standard cross-entropy. Provides ordinal awareness without architectural modification.
     \item \textbf{EDL (Ours):} Evidential Deep Learning with Type II MLE and KL regularization ($\lambda_{\text{KL}} = 0.1$). Outputs Dirichlet concentration parameters $\alpha_k$, predictions via $\hat{y} = \arg\max_k(\alpha_k - 1)$, uncertainty via $u = K / \sum_k \alpha_k$.
     \item \textbf{EDL+ORCU (Ours):} Combined EDL + ORCU loss with $\lambda = 0.5$ (ORCU weight). The ORCU component uses SORD soft encoding and log-barrier regularization with temperature $\tau = 3.0$.

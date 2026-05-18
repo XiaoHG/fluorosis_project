@@ -31,6 +31,13 @@ From $\alpha$: $S = \sum_k \alpha_k$, $p_k = \alpha_k / S$, $e_k = \alpha_k - 1$
 \end{equation}
 Ordinal constraints applied directly on logit differences $r_k = z_k - z_{k+1}$.
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/F11_architecture.pdf}
+\caption{Architecture overview of the proposed EDL+ORCU framework. A shared backbone (ViT-Base) extracts features $f \in \mathbb{R}^{768}$; the Evidence Head outputs logits $z \in \mathbb{R}^4$ that serve dual purposes: the EDL path derives Dirichlet concentration parameters $\alpha_k = \text{softplus}(z_k) + 1$, from which evidence $e_k$, class probabilities $p_k$, and predictive uncertainty $u$ are computed; the ORCU path applies SORD soft encoding and log-barrier regularization to enforce ordinal calibration and unimodal probability distributions.}
+\label{fig:f11}
+\end{figure}
+
 \subsection{Loss Function}
 
 \subsubsection{$L_{\text{EDL}}$: Evidential Loss}
