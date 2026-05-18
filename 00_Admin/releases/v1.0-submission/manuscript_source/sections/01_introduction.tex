@@ -1,0 +1,26 @@
+% ============================================================
+% Section 1: Introduction
+% ============================================================
+\section{Introduction}
+
+Endemic fluorosis, caused by excessive fluoride intake through drinking water, food, or industrial exposure, remains a significant public health concern affecting millions worldwide, particularly in regions of China, India, and East Africa \cite{gu2024zunyi,wei2019pathogenesis}. The disease manifests primarily as dental fluorosis (DF), characterized by chalky white streaks, staining, and enamel defects on teeth \cite{fejerskov1988dental,denbesten2011biological}. Clinical diagnosis follows Dean's 4-grade ordinal scale: Normal (0), Mild (1), Moderate (2), and Severe (3) \cite{dean1942fluorosis}, typically assessed through visual inspection of intraoral photographs \cite{schwendicke2021deep}.
+
+Recent advances in deep learning have enabled automated fluorosis diagnosis. On a 200-image DF dataset, MLTrMR achieved 80.19\% accuracy with a 556M-parameter transformer architecture \cite{xu2025mltrmr}, while LD2Net achieved 80.00\% accuracy with only 3.31M parameters \cite{li2026ld2net}. HiFuse \cite{huo2024hifuse} has also been evaluated on this benchmark, achieving 78.23\% accuracy with a hierarchical multi-scale architecture. However, these approaches share three fundamental limitations.
+
+First, they rely on standard cross-entropy loss, which treats fluorosis grades as nominal categories, discarding the inherent ordinal structure (Normal $<$ Mild $<$ Moderate $<$ Severe) critical for clinical grading. Misclassifying a Severe case as Moderate (adjacent, 1-grade error) carries different clinical consequences than misclassifying it as Normal (3-grade error), yet cross-entropy penalizes all errors equally.
+
+Second, they produce point-estimate predictions without any measure of prediction uncertainty. In medical diagnosis, knowing when the model is uncertain is as important as knowing the predicted grade. A confident wrong prediction is clinically dangerous; a correct but uncertain prediction appropriately triggers expert review. Standard deep learning classifiers provide no mechanism for distinguishing these scenarios.
+
+Third, they use majority-vote one-hot labels, discarding the inherent ambiguity in fluorosis grading. Dental fluorosis grading from photographs involves subjective visual assessment of enamel opacity, staining patterns, and surface defects. Different clinicians may assign different grades to the same image---a phenomenon well-documented in the skeletal fluorosis literature where pairwise inter-rater 4-grade agreement averages only 54.1\% across five radiologists \cite{xu2025mwinc}.
+
+To address these limitations, we propose a unified framework integrating Evidential Deep Learning (EDL) \cite{sensoy2018edl} with Ordinal Regression for Calibration and Unimodality (ORCU) \cite{kim2025orcu} for automated fluorosis diagnosis. Our key contributions are:
+
+\begin{enumerate}
+    \item \textbf{Uncertainty-aware ordinal diagnosis via a shared-logit bridge:} We design a single evidence head that outputs logits $z$, serving both the EDL path ($z \to \text{Softplus} \to \alpha$, producing Dirichlet evidence and uncertainty) and the ORCU path ($z \to \text{Softmax} \to p$, with soft ordinal encoding and log-barrier regularization). This shared-logit architecture ensures consistency between evidence accumulation and ordinal constraints without requiring separate prediction heads.
+
+    \item \textbf{First application of EDL and ORCU to fluorosis diagnosis:} To our knowledge, this is the first work introducing evidential deep learning and ordinal calibration loss to endemic fluorosis automated diagnosis. Our EDL model achieves 83.33\% accuracy (the highest on this benchmark, +3.14pp over MLTrMR) with Expected Calibration Error of 0.0719, providing calibrated Dirichlet uncertainty that standard approaches cannot offer.
+
+    \item \textbf{Stability and calibration analysis:} Through multi-seed experiments, we demonstrate EDL's substantially better initialization robustness than cross-entropy (CV 4.3\% vs 31.4\%). Through 5-fold cross-validation, EDL+ORCU achieves the most stable generalization (QWK CV 0.36\%). We further propose an uncertainty-gated clinical triage system validated with example diagnostic reports.
+
+    \item \textbf{Systematic ordinal loss comparison:} We provide the first systematic comparison of five loss functions (CE, Cumulative, SORD, EDL, EDL+ORCU) under a controlled backbone for ordinal medical image classification, offering practical guidance for loss selection in small-sample medical imaging scenarios.
+\end{enumerate}

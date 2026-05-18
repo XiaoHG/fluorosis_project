@@ -1,0 +1,69 @@
+% ============================================================
+% Section 4: Experiments
+% ============================================================
+\section{Experimental Setup}
+
+\subsection{Dataset}
+
+\textbf{DFID (Dental Fluorosis):} 200 intraoral photographs, $512 \times 256$ pixels, balanced across 4 classes (50 images per class: Normal, Mild, Moderate, Severe). Images were acquired using standard intraoral cameras under consistent lighting conditions. The dataset is split into 120 training (60\%, 30 per class), 20 validation (10\%, 5 per class), and 60 test (30\%, 15 per class) using stratified random sampling. The test split is aligned with the MLTrMR \cite{xu2025mltrmr} test partition to ensure direct comparability. All images are resized to $224 \times 224$ with ImageNet normalization ($\mu=[0.485, 0.456, 0.406]$, $\sigma=[0.229, 0.224, 0.225]$).
+
+\subsection{Backbone and Evidence Head}
+
+\textbf{Backbone:} ViT-Base (google/vit-base-patch16-224-in21k), pretrained on ImageNet-21k and fine-tuned on ImageNet-1k. 86M parameters, 12 transformer layers, 12 attention heads, 768-dim hidden size, $16 \times 16$ patch size. Output feature dimension $D = 768$ (CLS token).
+
+\textbf{Evidence Head:} A single fully-connected layer $\mathbf{W} \in \mathbb{R}^{768 \times 4}$ mapping backbone features to logits $z \in \mathbb{R}^4$. No batch normalization or dropout is applied at the head level. The same Evidence Head architecture serves all five loss modes; for CE and SORD, the standard classifier head is architecturally identical (FC $768 \to 4$) but trained with cross-entropy rather than EDL loss.
+
+\subsection{Loss Modes}
+
+We compare five loss configurations, all using the same ViT-Base backbone:
+
+\begin{itemize}
+    \item \textbf{CE:} Standard cross-entropy loss with one-hot encoded targets. Baseline representing the de facto standard in medical image classification.
+    \item \textbf{Cumulative:} Ordinal regression via cumulative link model, $P(y \leq k) = \sigma(\theta_k - z)$, with learnable thresholds $\theta_k$.
+    \item \textbf{SORD:} Soft-Encoded Ordinal Regression using squared distance soft labels $y^{\text{SORD}}_k = \text{softmax}(-(k - y)^2)$ with standard cross-entropy. Provides ordinal awareness without architectural modification.
+    \item \textbf{EDL (Ours):} Evidential Deep Learning with Type II MLE and KL regularization ($\lambda_{\text{KL}} = 0.1$). Outputs Dirichlet concentration parameters $\alpha_k$, predictions via $\hat{y} = \arg\max_k(\alpha_k - 1)$, uncertainty via $u = K / \sum_k \alpha_k$.
+    \item \textbf{EDL+ORCU (Ours):} Combined EDL + ORCU loss with $\lambda = 0.5$ (ORCU weight). The ORCU component uses SORD soft encoding and log-barrier regularization with temperature $\tau = 3.0$.
+\end{itemize}
+
+\subsection{Training Configuration}
+
+All experiments share the following configuration unless otherwise noted:
+
+\begin{itemize}
+    \item \textbf{Optimizer:} AdamW, $\text{lr}_{\text{backbone}} = 10^{-4}$, $\text{lr}_{\text{head}} = 10^{-3}$, weight decay $= 0.05$.
+    \item \textbf{Schedule:} Linear warmup (5 epochs) + cosine annealing to 0 over 100 total epochs.
+    \item \textbf{Batch size:} 32.
+    \item \textbf{Data augmentation:} Random resized crop (scale 0.8--1.0), random horizontal flip ($p=0.5$), random rotation ($\pm 10^\circ$), color jitter (brightness=0.2, contrast=0.2).
+    \item \textbf{Training stages (EDL/EDL+ORCU):}
+    \begin{enumerate}
+        \item Stage 1 (Epochs 0--4): CE warmup on logits $z$.
+        \item Stage 2 (Epochs 5--34): EDL loss only, with KL annealing coefficient $t = \min(1.0, \text{epoch} / 30)$.
+        \item Stage 3 (Epochs 35--99): Combined EDL + $\lambda \cdot L_{\text{ORCU}}$, with $\lambda$ linearly annealed from 0 to 0.5 over epochs 35--65.
+    \end{enumerate}
+    \item \textbf{CE/SORD/Cumulative:} Trained with their respective loss functions for 100 epochs, same optimizer and augmentation.
+\end{itemize}
+
+\subsection{Evaluation Metrics}
+
+We employ the following metrics to assess classification performance, calibration, and uncertainty quality:
+
+\begin{itemize}
+    \item \textbf{Accuracy (Acc)} and \textbf{Macro-F1}: Overall classification performance.
+    \item \textbf{Quadratic Weighted Kappa (QWK):} Ordinal agreement metric penalizing larger grade discrepancies more heavily. QWK $\in [-1, 1]$, with 0 indicating chance-level agreement and 1 perfect agreement.
+    \item \textbf{Expected Calibration Error (ECE):} $\mathbb{E}[|P(\text{correct} \mid \text{conf}) - \text{conf}|]$, computed with 15 equal-width bins. Measures reliability of confidence estimates.
+    \item \textbf{\%Unimodal:} Fraction of test samples where the predicted probability distribution has exactly one peak. A unimodal distribution is clinically more interpretable than a multi-modal one.
+    \item \textbf{Uncertainty-ECE (U-ECE):} ECE computed over uncertainty bins rather than confidence bins, applicable only to EDL.
+    \item \textbf{AUROC($u$):} Area under the ROC curve using uncertainty $u$ as a misclassification predictor. AUROC $>0.5$ indicates uncertainty is informative for error detection.
+\end{itemize}
+
+\textbf{Clinical decision-support metrics} (for auto-diagnosis evaluation, $\theta = 0.30$):
+
+\begin{itemize}
+    \item \textbf{SafePred (Safe Prediction Rate):} Accuracy among samples with $u < \theta$ (low-uncertainty samples routed to auto-diagnosis). Higher is better.
+    \item \textbf{RecAcc (Recommendation Accuracy):} 1 $-$ Accuracy among samples with $u \geq \theta$ (high-uncertainty samples flagged for review). Measures how effectively uncertainty identifies difficult cases. Higher is better.
+    \item \textbf{AutoRate:} Fraction of test samples with $u < \theta$, representing the proportion eligible for automated diagnosis.
+\end{itemize}
+
+\subsection{Reproducibility}
+
+All experiments use NVIDIA T4 GPUs (Kaggle environment, 2$\times$ T4). Three random seeds (42, 123, 456) control data shuffling, weight initialization, and augmentation randomness. 5-fold cross-validation uses stratified splits preserving per-class proportions. Reported single-split results use seed 42 (the default). Code and trained model weights will be released upon publication.
