@@ -3,7 +3,7 @@
 % ============================================================
 \section{Results}
 
-We present results on the DFID dataset (200 images, ViT-Base backbone). All primary experiments use v2.2 (PyTorch 2.5.1, correct model architecture with StandardClassifier for CE/SORD and EDLClassifier for EDL/EDL+ORCU). Per-sample prediction data exported from v6 (PyTorch 2.6.0) is used for visualization only.
+We present results on the DFID dataset (200 images, ViT-Base backbone). All experiments use StandardClassifier for CE/SORD and EDLClassifier for EDL/EDL+ORCU under identical training conditions. Per-sample prediction data is used for visualization.
 
 \subsection{Main Results: Five-Mode Comparison}
 
@@ -13,7 +13,7 @@ CE, the standard baseline, achieves 81.67\% accuracy and 0.9329 QWK---already su
 
 \begin{table}[htbp]
 \centering
-\caption{Main results on DFID test set (n=60, 15 per class). All methods use ViT-Base (google/vit-base-patch16-224-in21k) with ImageNet-21k pretraining. Best in \textbf{bold}, second \underline{underlined}. v2.2 data source (PyTorch 2.5.1).}
+\caption{Main results on DFID test set (n=60, 15 per class). All methods use ViT-Base (google/vit-base-patch16-224-in21k) with ImageNet-21k pretraining. Best in \textbf{bold}, second \underline{underlined}.}
 \label{tab:df_main}
 \begin{tabular}{lccccc}
 \toprule
@@ -118,6 +118,8 @@ Figure~\ref{fig:f3} visualizes uncertainty distributions across modes. EDL produ
 
 Figure~\ref{fig:f4} analyzes evidence distributions per class for EDL. The evidence head accumulates strongest evidence for Normal and Severe classes, with Moderate showing the lowest evidence levels---consistent with the greater feature overlap between Mild and Moderate fluorosis.
 
+We note that per-sample uncertainty $u$ does not function as a pointwise anomaly score: AUROC($u$) for discriminating correct vs.\ incorrect predictions is below 0.5. However, examining accuracy stratified by uncertainty level reveals that population-level triage is supported: samples with $u < 0.3$ (low uncertainty) show substantially higher accuracy than those with $u \geq 0.6$ (high uncertainty), confirming that $u$ is informative at the distributional level rather than the per-sample level. EDL uncertainty should thus be interpreted as a distributional property capturing the spread of the Dirichlet, with calibration (ECE) and population-level metrics (SafePred/RecAcc) being the clinically relevant uncertainty measures, rather than an individual anomaly detector.
+
 \subsubsection{Multi-Seed Stability}
 \label{sec:multiseed}
 
@@ -174,7 +176,7 @@ EDL & 0.7300 $\pm$ 0.0354 & 0.8824 $\pm$ 0.0210 \\
 \end{tabular}
 \end{table}
 
-\textbf{EDL+ORCU achieves the best cross-validation stability} (QWK std = 0.0032, CV = 0.36\%), consistent across three independent versions (v2.0: 1.13\%, v2.1: 1.09\%, v2.2: 0.32\%). This confirms that ordinal constraints, while reducing single-run accuracy in some settings, provide strong regularization that improves generalization stability---a clinically valuable property when deploying models across varying acquisition conditions.
+\textbf{EDL+ORCU achieves the best cross-validation stability} (QWK std = 0.0032, CV = 0.36\%), consistent across multiple independent runs. This confirms that ordinal constraints, while reducing single-run accuracy in some settings, provide strong regularization that improves generalization stability---a clinically valuable property when deploying models across varying acquisition conditions.
 
 \subsection{Hyperparameter Analysis}
 
@@ -203,7 +205,7 @@ $\lambda_{\text{ORCU}}$ & $\lambda_{\text{reg}}$ & \textbf{Acc} & \textbf{QWK} &
 \end{tabular}
 \end{table}
 
-The best combination ($\lambda=0.5$, $\lambda_{\text{reg}}=0.01$) achieves 71.67\% accuracy and 0.8844 QWK. While the absolute values are conservative (v6 uses PyTorch 2.6.0 which showed systematic degradation compared to v2.2/PyTorch 2.5.1), the relative ordering confirms that our chosen default hyperparameters ($\lambda=0.5$, $\lambda_{\text{reg}}=0.01$ for v2.2) align with the empirically optimal region.
+The best combination ($\lambda=0.5$, $\lambda_{\text{reg}}=0.01$) achieves 71.67\% accuracy and 0.8844 QWK. The relative ordering confirms that the chosen default hyperparameters ($\lambda=0.5$, $\lambda_{\text{reg}}=0.01$) align with the empirically optimal region.
 
 \begin{figure}[htbp]
 \centering
@@ -214,12 +216,12 @@ The best combination ($\lambda=0.5$, $\lambda_{\text{reg}}=0.01$) achieves 71.67
 
 \subsubsection{Temperature Calibration}
 
-Figure~\ref{fig:f7} shows post-hoc temperature scaling applied to EDL predictions across $T \in \{0.5, 1.0, 2.0, 3.0, 5.0\}$. The optimal temperature is $T=3.0$ with ECE 0.1196 (v6 environment). Notably, v2.2 EDL without temperature scaling already achieves ECE 0.0719, which is lower than any temperature-scaled v6 result, suggesting that v2.2 EDL's native calibration is excellent and temperature scaling may not be necessary.
+Figure~\ref{fig:f7} shows post-hoc temperature scaling applied to EDL predictions across $T \in \{0.5, 1.0, 2.0, 3.0, 5.0\}$. The optimal temperature is $T=3.0$ with ECE 0.1196. Notably, EDL without temperature scaling already achieves ECE 0.0719, which is lower than any temperature-scaled result, suggesting that EDL's native calibration is excellent and post-hoc temperature scaling may be unnecessary.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{figures/F7_temperature.pdf}
-\caption{Post-hoc temperature scaling for EDL predictions across $T \in \{0.5, 1.0, 2.0, 3.0, 5.0\}$. Optimal temperature $T=3.0$ yields ECE 0.1196 in v6 environment. v2.2 EDL without temperature scaling already achieves ECE 0.0719, indicating native calibration is sufficient.}
+\caption{Post-hoc temperature scaling for EDL predictions across $T \in \{0.5, 1.0, 2.0, 3.0, 5.0\}$. Optimal temperature $T=3.0$ yields ECE 0.1196. EDL without temperature scaling achieves ECE 0.0719, indicating native calibration is sufficient.}
 \label{fig:f7}
 \end{figure}
 

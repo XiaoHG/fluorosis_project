@@ -23,12 +23,13 @@ From $z$, two paths diverge:
 \begin{equation}
     \alpha_k = \text{softplus}(z_k) + 1
 \end{equation}
-From $\alpha$: $S = \sum_k \alpha_k$, $p_k = \alpha_k / S$, $e_k = \alpha_k - 1$, $u = K / S \in (0, 1)$.
+From $\alpha$: $S = \sum_k \alpha_k$, $p_k^{\text{Dir}} = \alpha_k / S$ (Dirichlet mean), $e_k = \alpha_k - 1$, $u = K / S \in (0, 1)$.
 
-\textbf{ORCU path:} Probabilities via softmax on the same logits:
+\textbf{ORCU path:} Softmax probabilities on the same logits:
 \begin{equation}
-    p_k = \frac{\exp(z_k)}{\sum_j \exp(z_j)}
+    p_k^{\text{soft}} = \frac{\exp(z_k)}{\sum_j \exp(z_j)}
 \end{equation}
+Note that $p_k^{\text{Dir}}$ and $p_k^{\text{soft}}$ are different transformations of $z$: the Dirichlet mean incorporates the unit shift from $\alpha_k = \text{softplus}(z_k) + 1$, while the softmax directly exponentiates logits. In the loss functions below, $p_k$ in $L_{\text{SCE}}$ refers to the softmax probabilities $p_k^{\text{soft}}$.
 Ordinal constraints applied directly on logit differences $r_k = z_k - z_{k+1}$.
 
 \begin{figure}[htbp]
@@ -52,7 +53,7 @@ where $\psi(\cdot)$ is the digamma function, $\tilde{\alpha}_k = y_k + (1 - y_k)
 
 \textbf{SORD Encoding \cite{diaz2018sord}:} Soft targets from squared ordinal distance:
 \begin{equation}
-    y^{\text{SORD}}_k = \text{softmax}\big(-(k - y)^2\big), \quad L_{\text{SCE}} = -\sum_k y^{\text{SORD}}_k \log p_k
+    y^{\text{SORD}}_k = \text{softmax}\big(-(k - y)^2\big), \quad L_{\text{SCE}} = -\sum_k y^{\text{SORD}}_k \log p_k^{\text{soft}}
 \end{equation}
 
 \textbf{Log-Barrier Regularization:} For each adjacent pair $(k, k+1)$, $r_k = z_k - z_{k+1}$:
