@@ -5,7 +5,7 @@
 
 \subsection{Overview}
 
-Our framework consists of three components: (1) a backbone for feature extraction, (2) a shared evidence head outputting logits $z \in \mathbb{R}^K$ for $K = 4$ classes, and (3) a joint loss combining evidential learning and ordinal calibration. The architecture is backbone-agnostic: we use ViT-Base \cite{dosovitskiy2020vit} with ImageNet-21k pretraining for dental fluorosis classification.
+Our framework consists of three components: (1) a backbone for feature extraction, (2) a shared evidence head outputting logits $z \in \mathbb{R}^K$ for $K = 4$ classes, and (3) a joint loss combining evidential learning and ordinal calibration. The architecture is backbone-agnostic: we use ViT-Base \cite{dosovitskiy2020vit} with ImageNet-21k pretraining \cite{raghu2019transfusion} for dental fluorosis classification, though the evidence head is compatible with any backbone including ResNet \cite{he2016resnet}.
 
 \subsection{Evidence Head: Shared-Logit Bridge}
 
@@ -50,7 +50,7 @@ where $\psi(\cdot)$ is the digamma function, $\tilde{\alpha}_k = y_k + (1 - y_k)
 
 \subsubsection{$L_{\text{ORCU}}$: Ordinal Calibration Loss}
 
-\textbf{SORD Encoding:} Soft targets from squared ordinal distance:
+\textbf{SORD Encoding \cite{diaz2018sord}:} Soft targets from squared ordinal distance:
 \begin{equation}
     y^{\text{SORD}}_k = \text{softmax}\big(-(k - y)^2\big), \quad L_{\text{SCE}} = -\sum_k y^{\text{SORD}}_k \log p_k
 \end{equation}
