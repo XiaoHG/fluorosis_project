@@ -5,7 +5,7 @@
 
 \subsection{Overview}
 
-Our framework consists of three components: (1) a task-specific backbone for feature extraction, (2) a shared evidence head outputting logits $z \in \mathbb{R}^K$ for $K = 4$ classes, and (3) a joint loss combining evidential learning and ordinal calibration. The architecture is backbone-agnostic: ViT-Base \cite{dosovitskiy2020vit} for DF (ImageNet-21k pretrained) and ResNet-50 \cite{he2016resnet} for SF (ImageNet-1k pretrained).
+Our framework consists of three components: (1) a backbone for feature extraction, (2) a shared evidence head outputting logits $z \in \mathbb{R}^K$ for $K = 4$ classes, and (3) a joint loss combining evidential learning and ordinal calibration. The architecture is backbone-agnostic: we use ViT-Base \cite{dosovitskiy2020vit} with ImageNet-21k pretraining for dental fluorosis classification.
 
 \subsection{Evidence Head: Shared-Logit Bridge}
 
@@ -15,7 +15,7 @@ The evidence head replaces the standard classifier and produces logits $z$ servi
     z = \mathbf{W} \cdot \text{Dropout}(f) + \mathbf{b}, \quad \mathbf{W} \in \mathbb{R}^{D \times K}
 \end{equation}
 
-where $f \in \mathbb{R}^D$ is the backbone feature (768-dim for ViT, 2048-dim for ResNet-50).
+where $f \in \mathbb{R}^D$ is the backbone feature vector (768-dim for ViT-Base).
 
 From $z$, two paths diverge:
 
@@ -70,19 +70,19 @@ $L_{\text{ORCU}} = L_{\text{SCE}} + L_{\text{REG}}$.
 
 Three-stage training:
 \begin{enumerate}
-    \item \textbf{Stage 1 (CE warmup):} Cross-entropy on $z$, DF: 5 epochs, SF: 10 epochs.
-    \item \textbf{Stage 2 (EDL only):} $L_{\text{EDL}}$ with KL annealing. DF: 30 epochs, SF: 45 epochs.
+    \item \textbf{Stage 1 (CE warmup):} Cross-entropy on $z$ for 5 epochs.
+    \item \textbf{Stage 2 (EDL only):} $L_{\text{EDL}}$ with KL annealing for 30 epochs.
     \item \textbf{Stage 3 (Joint):} $L_{\text{EDL}} + \lambda L_{\text{ORCU}}$, $\lambda$ annealed from 0 to 0.5 over first half of stage.
 \end{enumerate}
 
-\subsection{Multi-Rater Soft Labels (SF Only)}
+\subsection{Multi-Rater Soft Labels}
 
-For SF images with 5-radiologist annotation counts $[c_0, c_1, c_2, c_3]$:
+For scenarios where multiple annotators independently grade each image, the framework supports multi-rater soft labels. Given $R$ raters with annotation counts $[c_0, c_1, c_2, c_3]$ where $\sum_k c_k = R$:
 \begin{equation}
-    y^{\text{multi}}_k = c_k / 5
+    y^{\text{multi}}_k = c_k / R
 \end{equation}
-Example: 1 Mild + 3 Moderate + 1 Severe $\to$ $y^{\text{multi}} = [0, 0.2, 0.6, 0.2]$. For DF (single-rater), standard SORD encoding is used.
+Example: 1 Mild + 3 Moderate + 1 Severe $\to$ $y^{\text{multi}} = [0, 0.2, 0.6, 0.2]$. This soft target replaces the SORD encoding in $L_{\text{SCE}}$, allowing the model to learn from the full annotation distribution rather than a single majority-vote label. For single-rater datasets (including the DFID dataset used in our experiments), standard SORD encoding is used. Multi-rater soft labels are applicable to the skeletal fluorosis dataset \cite{xu2025mwinc} (5 radiologists per image), which we leave for future work.
 
 \subsection{Training Details}
 
-AdamW optimizer: $\text{lr}_{\text{backbone}} = 10^{-4}$, $\text{lr}_{\text{head}} = 10^{-3}$, weight decay 0.05. LR schedule: linear warmup (5/10 epochs DF/SF) + cosine annealing. Batch sizes: 32 (DF), 16 (SF). Epochs: 100 (DF), 150 (SF). Augmentation: random resized crop (0.8--1.0), horizontal flip ($p=0.5$), rotation ($\pm 10^\circ$), color jitter (DF only, 0.2). Images resized to $224 \times 224$, ImageNet normalization.
+AdamW optimizer: $\text{lr}_{\text{backbone}} = 10^{-4}$, $\text{lr}_{\text{head}} = 10^{-3}$, weight decay 0.05. LR schedule: linear warmup (5 epochs) + cosine annealing to 0 over 100 total epochs. Batch size: 32. Augmentation: random resized crop (scale 0.8--1.0), horizontal flip ($p=0.5$), random rotation ($\pm 10^\circ$), color jitter (brightness=0.2, contrast=0.2). All images resized to $224 \times 224$ with ImageNet normalization ($\mu=[0.485,0.456,0.406]$, $\sigma=[0.229,0.224,0.225]$).
