@@ -60,7 +60,6 @@ Table~\ref{tab:sota} compares our methods against published state-of-the-art on 
 \midrule
 MLTrMR$^\dagger$ \cite{xu2025mltrmr} & 80.19 & 75.79 & 0.8130 & 556M & None \\
 LD2Net$^\dagger$ \cite{li2026ld2net} & 80.00 & 79.88 & -- & \textbf{3.31M} & None \\
-FusionDentNet$^\dagger$ \cite{xu2024fusiondentnet} & 80.00 & 79.25 & -- & 201M & None \\
 HiFuse$^\dagger$ \cite{huo2024hifuse} & 78.23 & 70.45 & -- & 164M & None \\
 \midrule
 Ours (ViT-B + CE) & 81.67 & 80.85 & 0.9329 & 86M & Entropy \\
@@ -69,7 +68,7 @@ Ours (ViT-B + CE) & 81.67 & 80.85 & 0.9329 & 86M & Entropy \\
 \end{tabular}
 \end{table}
 
-Our CE baseline (81.67\%) already exceeds the published SOTA ceiling of $\sim$80\% accuracy, attributable to ImageNet-21k pretrained ViT-Base transfer learning. EDL further raises the bar to 83.33\% (+3.14pp over MLTrMR, +3.33pp over LD2Net/FusionDentNet), while additionally providing calibrated Dirichlet uncertainty---a capability none of the competing methods offer. In terms of parameter efficiency, our ViT-Base (86M) is substantially lighter than MLTrMR (556M) and FusionDentNet (201M), though heavier than LD2Net (3.31M), which prioritizes edge deployment over accuracy.
+Our CE baseline (81.67\%) already exceeds published results on this dataset, attributable to ImageNet-21k pretrained ViT-Base transfer learning. EDL further raises the bar to 83.33\% (+3.14pp over MLTrMR, +3.33pp over LD2Net), while additionally providing calibrated Dirichlet uncertainty---a capability none of the competing methods offer. We note that the 1.67pp accuracy gain over our own CE baseline (1 additional correct prediction out of 60 test samples) is not statistically significant by McNemar's test ($p > 0.05$); the principal contributions of EDL lie in calibration quality (ECE reduced by 40.7\%), seed robustness (CV reduced from 31.4\% to 4.3\%), and uncertainty quantification rather than raw accuracy improvement. In terms of parameter efficiency, our ViT-Base (86M) is substantially lighter than MLTrMR (556M), though heavier than LD2Net (3.31M), which prioritizes edge deployment over accuracy.
 
 \begin{figure}[htbp]
 \centering
