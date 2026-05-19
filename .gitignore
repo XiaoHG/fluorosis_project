@@ -1,35 +1,19 @@
-# Obsidian
-.obsidian/workspace.json
-.obsidian/workspace-mobile.json
-.trash/
+# Obsidian (entire vault config)
+.obsidian/
 
-# Python
+# AppleDouble resource forks (comprehensive)
+._*
+*.DS_Store
+Thumbs.db
+
+# Python bytecode
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.venv/
-venv/
-env/
-*.egg-info/
-dist/
-build/
 
-# Jupyter
+# Jupyter checkpoints
 .ipynb_checkpoints/
 
-# Experiments & runtime
-06_Implementation/checkpoints/*
-!06_Implementation/checkpoints/.gitkeep
-06_Implementation/logs/*
-!06_Implementation/logs/.gitkeep
-06_Implementation/results/*
-!06_Implementation/results/.gitkeep
-07_Visualization/01_drafts/*.png
-07_Visualization/02_final_figures/*
-!07_Visualization/02_final_figures/.gitkeep
-
-# LaTeX artifacts
+# LaTeX artifacts (comprehensive)
 *.aux
 *.bbl
 *.blg
@@ -41,22 +25,34 @@ build/
 *.toc
 *.lof
 *.lot
+*.spl
+*.run.xml
+*.bcf
 
-# OS
-.DS_Store
-Thumbs.db
-._*
-
-# Kaggle zip archives (too large)
-Kaggle_Setup/*.zip
-
-# Literature PDFs & extracted text (too large, keep local only)
-/02_Literature/01_initial_search/References/
-/02_Literature/01_initial_search/References_extracted/
-
-# Sensitive data
+# Experiment data (large binary files)
+*.npz
 *.pth
 *.pt
 *.pkl
+*.zip
+
+# Exceptions: keep release & Overleaf ZIP archives
+!00_Admin/releases/**/*.zip
+!08_Manuscript/**/manuscript_overleaf*.zip
+
+# Kaggle (all experiment files)
+Kaggle_Setup/
+
+# Literature PDFs & extracted text
+/02_Literature/01_initial_search/References/
+/02_Literature/01_initial_search/References_extracted/
+
+# Duplicate experiment figures/directories
+05_Exp_Design/figures/
+05_Exp_Design/figures_v1/
+05_Exp_Design/figures_v2/
+05_Exp_Design/exp_v1/
+08_Manuscript/v1_first_draft/manuscript_overleaf_zh/
+
+# Sensitive data
 /data/
-/datasets/
