@@ -174,3 +174,64 @@ def evaluate(model, dataloader, device="cuda"):
     targets = torch.cat(all_targets, dim=0)
 
     return compute_metrics(alpha, z, targets)
+
+
+@torch.no_grad()
+def export_predictions(model, dataloader, device="cuda"):
+    """Collect per-sample predictions for figure generation.
+
+    Returns dict: y_true, y_pred, prob, alpha (EDL only), u, evidence (EDL only),
+    entropy, logits. All values are numpy arrays.
+    """
+    model.eval()
+    all_alpha, all_z, all_targets = [], [], []
+
+    for images, targets in dataloader:
+        images = images.to(device)
+        targets = targets.to(device)
+        alpha, z = model(images)
+        if alpha is not None:
+            all_alpha.append(alpha.cpu())
+        all_z.append(z.cpu())
+        all_targets.append(targets.cpu())
+
+    alpha_t = torch.cat(all_alpha, dim=0) if all_alpha else None
+    logits = torch.cat(all_z, dim=0)
+    targets = torch.cat(all_targets, dim=0)
+    K = logits.shape[-1]
+    probs = F.softmax(logits, dim=-1)
+    preds = torch.argmax(probs, dim=-1)
+
+    if alpha_t is not None:
+        S = alpha_t.sum(dim=-1)
+        u = (K / S).cpu().numpy()
+        evidence = (alpha_t - 1.0).cpu().numpy()
+        alpha_np = alpha_t.cpu().numpy()
+    else:
+        u = (-torch.sum(probs * torch.log(probs + 1e-8), dim=-1)
+             / torch.log(torch.tensor(K, dtype=torch.float32))).cpu().numpy()
+        evidence = None
+        alpha_np = None
+
+    entropy = (-torch.sum(probs * torch.log(probs + 1e-8), dim=-1)).cpu().numpy()
+
+    return {
+        "y_true": targets.cpu().numpy().astype(np.int64),
+        "y_pred": preds.cpu().numpy().astype(np.int64),
+        "prob": probs.cpu().numpy().astype(np.float32),
+        "alpha": alpha_np.astype(np.float32) if alpha_np is not None else None,
+        "u": u.astype(np.float32),
+        "evidence": evidence.astype(np.float32) if evidence is not None else None,
+        "entropy": entropy.astype(np.float32),
+        "logits": logits.cpu().numpy().astype(np.float32),
+    }
+
+
+def save_predictions(data, filepath, mode="edl", task="df", seed=42, fold=-1):
+    """Save per-sample predictions as .npz with metadata."""
+    save_dict = {k: v for k, v in data.items() if v is not None}
+    save_dict["_mode"] = mode
+    save_dict["_task"] = task
+    save_dict["_seed"] = seed
+    save_dict["_fold"] = fold
+    np.savez_compressed(filepath, **save_dict)
