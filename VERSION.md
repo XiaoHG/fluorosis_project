@@ -6,8 +6,25 @@
 |-------|-------|
 | Version | v2.0 (development) |
 | Started | 2026-05-22 |
-| Based on | v1.0 (tag: `v1.0`, commit `f36cde4`) |
+| Based on | v1.0 (tag: `v1.0`, commit `f36cde4`, v2.2 experiment node) |
 | Branch | master |
+| Architecture | StandardClassifier (CE/SORD) + EDLClassifier (EDL/EDL+ORCU) — v2.2 corrected dispatch |
+
+---
+
+## v2.2 Starting Point
+
+v2 inherits from v1's v2.2 experiment node — the bug-fix release that established the correct architecture:
+
+| Asset | Status |
+|-------|--------|
+| `StandardClassifier` in backbones.py | Correct CE/SORD dispatch |
+| `EDLClassifier` in backbones.py | Correct EDL/EDL+ORCU dispatch |
+| `SFDataset` in dataset.py | Implemented, not tested |
+| SF data (80 X-ray images) | Available in `data/skeletal_fluorosis/` |
+| DFID data (200 images) | Available in `data/dental_fluorosis/` |
+| DF baseline results | EDL 83.33% Acc, ECE 0.072 |
+| Per-sample predictions | Missing (v2 Phase 1 priority) |
 
 ---
 
