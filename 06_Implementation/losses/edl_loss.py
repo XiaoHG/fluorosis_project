@@ -12,10 +12,11 @@ import torch.nn.functional as F
 class EDLLoss(nn.Module):
     """EDL loss with KL-divergence annealing."""
 
-    def __init__(self, num_classes: int = 4, kl_lambda: float = 0.1):
+    def __init__(self, num_classes: int = 4, kl_lambda: float = 0.1, kl_anneal_cap: float = 0.5):
         super().__init__()
         self.num_classes = num_classes
         self.kl_lambda = kl_lambda
+        self.kl_anneal_cap = kl_anneal_cap
 
     def forward(self, alpha, targets, epoch=None, total_epochs=None):
         K = alpha.shape[-1]
@@ -35,7 +36,7 @@ class EDLLoss(nn.Module):
         )
 
         if epoch is not None and total_epochs is not None:
-            anneal = min(1.0, epoch / (total_epochs * 0.3))
+            anneal = min(self.kl_anneal_cap, epoch / (total_epochs * 0.3))
         else:
             anneal = 1.0
 

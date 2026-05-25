@@ -19,13 +19,14 @@ class CombinedLoss(nn.Module):
     def __init__(
         self,
         num_classes: int = 4,
-        lambda_orcu: float = 0.5,
-        lambda_kl: float = 0.1,
+        lambda_orcu: float = 0.05,
+        lambda_kl: float = 0.02,
+        kl_anneal_cap: float = 0.5,
         orcu_t: float = 3.0,
-        orcu_lambda_reg: float = 0.01,
-        stage_1_epochs: int = 5,
-        stage_2_epochs: int = 30,
-        total_epochs: int = 100,
+        orcu_lambda_reg: float = 0.005,
+        stage_1_epochs: int = 3,
+        stage_2_epochs: int = 10,
+        total_epochs: int = 50,
     ):
         super().__init__()
         self.num_classes = num_classes
@@ -34,7 +35,7 @@ class CombinedLoss(nn.Module):
         self.stage_2_epochs = stage_2_epochs
         self.total_epochs = total_epochs
 
-        self.edl_loss = EDLLoss(num_classes=num_classes, kl_lambda=lambda_kl)
+        self.edl_loss = EDLLoss(num_classes=num_classes, kl_lambda=lambda_kl, kl_anneal_cap=kl_anneal_cap)
         self.orcu_loss = ORCULoss(num_classes=num_classes, t=orcu_t, lambda_reg=orcu_lambda_reg)
 
     def get_stage(self, epoch):

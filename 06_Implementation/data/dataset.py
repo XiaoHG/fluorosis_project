@@ -140,6 +140,7 @@ def get_transforms(task="df", is_train=True):
                 T.RandomHorizontalFlip(p=0.5),
                 T.RandomRotation(10),
                 T.ColorJitter(brightness=0.2, contrast=0.2),
+                T.RandAugment(num_ops=2, magnitude=9),
                 T.ToTensor(),
                 T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             ])
@@ -156,6 +157,7 @@ def get_transforms(task="df", is_train=True):
                 T.RandomResizedCrop(input_size, scale=(0.8, 1.0)),
                 T.RandomHorizontalFlip(p=0.5),
                 T.RandomRotation(10),
+                T.RandAugment(num_ops=2, magnitude=9),
                 T.ToTensor(),
                 T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             ])
