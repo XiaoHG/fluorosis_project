@@ -45,6 +45,8 @@ def compute_metrics(alpha, z, targets, num_bins=15, temperature=1.0):
 
     from sklearn.metrics import f1_score
     f1 = f1_score(y_true, y_pred, average="macro")
+    w_f1 = f1_score(y_true, y_pred, average="weighted")
+    per_class_f1 = f1_score(y_true, y_pred, average=None)
 
     qwk = cohen_kappa_score(y_true, y_pred, weights="quadratic")
 
@@ -76,6 +78,8 @@ def compute_metrics(alpha, z, targets, num_bins=15, temperature=1.0):
     return {
         "acc": acc,
         "macro_f1": f1,
+        "weighted_f1": w_f1,
+        "per_class_f1": per_class_f1.tolist(),
         "qwk": qwk,
         "ece": ece,
         "sce": sce,
