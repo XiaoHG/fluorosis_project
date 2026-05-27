@@ -6,6 +6,9 @@
 *.DS_Store
 Thumbs.db
 
+# Python virtual environment
+.venv/
+
 # Python bytecode
 __pycache__/
 *.py[cod]
@@ -47,12 +50,17 @@ Kaggle_Setup/
 /02_Literature/01_initial_search/References/
 /02_Literature/01_initial_search/References_extracted/
 
-# Duplicate experiment figures/directories
+# Legacy experiment directories (migrated to v1/ and v2/)
+05_Exp_Design/exp_v1/
+05_Exp_Design/exp_v2/
 05_Exp_Design/figures/
 05_Exp_Design/figures_v1/
 05_Exp_Design/figures_v2/
-05_Exp_Design/exp_v1/
+05_Exp_Design/fluorosis_pro.zip
 08_Manuscript/v1_first_draft/manuscript_overleaf_zh/
 
 # Sensitive data
 /data/
+
+# Kaggle artifact
+df_exp_result/

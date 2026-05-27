@@ -6,7 +6,7 @@
 
 ## Context
 
-Backbone selection for 120-sample fluorosis classification. Prior methods: MLTrMR (556M-param transformer), LD2Net (3.31M CNN), FusionDentNet (201M), HiFuse (164M).
+Backbone selection for 120-sample fluorosis classification. Prior methods: MLTrMR (556M-param transformer), LD2Net (3.31M CNN), FusionDentNet (201M).
 
 ## Options Considered
 

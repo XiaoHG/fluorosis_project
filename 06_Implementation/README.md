@@ -98,10 +98,28 @@ python scripts/uncertainty_baselines.py --task df --data_root ../.. --method bot
 | U-ECE | Uncertainty-calibrated ECE | down |
 | AUROC(u) | Uncertainty vs error discrimination | up |
 
+## Server Setup (RTX PRO 6000 Blackwell)
+
+```bash
+# 1. Clone and setup
+git clone git@github.com:XiaoHG/fluorosis_project.git
+cd fluorosis_project
+bash setup.sh
+
+# 2. Place data under data/
+#    DF: data/dental_fluorosis/images/{normal,mild,moderate,severe}/*.png
+#    SF: data/skeletal_fluorosis/images/*.png + data/skeletal_fluorosis/GT.xlsx
+
+# 3. Activate environment and train
+source .venv/bin/activate
+cd 06_Implementation
+python train.py --task df --data_root .. --mode edl --epochs 75
+```
+
 ## Dependencies
 
-- PyTorch >= 2.0
+- PyTorch >= 2.0 (CUDA 13.0 nightly for Blackwell: `pip install --pre torch --index-url https://download.pytorch.org/whl/nightly/cu130`)
 - torchvision
 - transformers (for ViT)
-- scikit-learn
-- numpy, pandas, PIL
+- scikit-learn, scipy
+- numpy, pandas, Pillow, openpyxl

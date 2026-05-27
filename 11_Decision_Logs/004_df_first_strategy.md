@@ -14,7 +14,7 @@ Focus v1 on DF only. Defer SF to future work.
 
 ## Rationale
 
-- DF has published benchmarks (MLTrMR, LD2Net, FusionDentNet, HiFuse) enabling direct SOTA comparison
+- DF has published benchmarks (MLTrMR, LD2Net, FusionDentNet) enabling direct SOTA comparison
 - SF experiments incomplete at time of writing
 - v1 establishes EDL+ORCU framework; SF with multi-rater labels is natural extension
 

@@ -1,33 +1,33 @@
----
-date: 2026-05-15
-author: ExpDesignAgent
-output_to: "05_Exp_Design/README.md"
-status: draft
----
+# Experiment Design — Version Index
 
-# 05_Exp_Design — 实验设计
+**One version = one folder.** When starting a new experiment round, create `vN/` following the template below.
 
-## 实验概览
+## Version Overview
 
-- **Baselines**: 7 (3 DF + 4 SF, 含人类基线)
-- **Our methods**: 6 (3 DF + 3 SF)
-- **Ablations**: 6
-- **Uncertainty analysis**: 5
-- **Total experiments**: ~24
+| Version | Status | Scope | Best Result | Period |
+|---------|--------|-------|-------------|--------|
+| [v1/](v1/) | Archived | DF only, initial EDL+ORCU validation | EDL 83.33% (single seed 42) | May 15-22 |
+| [v2/](v2/) | **Active** | DF+SF, 4-phase systematic validation | EDL CV 79.33% +/- 3.74 | May 22-27 |
+| [v3/](v3/) | Planned | DF V6 + SF multi-rater | TBD | — |
 
-## 关键设计决策
+## New Version Template
 
-1. DF 120/20/60 split — 与 MLTrMR 的 140/60 test 对齐
-2. SF 48/8/24 split — 与 Mwinc-Mamba 的 56/24 test 对齐
-3. 复现策略: 不完整复现竞品架构，以相同 backbone + CE 为 proxy baseline
-4. U5 是关键创新分析: 医生一致性 vs 模型不确定性相关性
+```
+vN/
+├── plan.md              # Experiment plan (hypotheses, matrix, configs)
+├── README.md            # Version summary with key results
+├── reports/             # Analysis reports (one per sub-version)
+├── results/             # Structured outputs (JSON for final, NPZ for raw)
+│   ├── df/              # DF experiment results
+│   └── sf/              # SF experiment results
+├── notebooks/           # Kaggle training + analysis notebooks
+└── figures/             # Generated figures
+```
 
-## 文件
+## Version Management Rules
 
-| 文件 | 内容 |
-|------|------|
-| `01_experiment_plan.md` | 完整实验矩阵 |
-
-## 下一步
-
-→ `06_Implementation/` — 训练脚本、数据加载器、评估工具
+1. New experiment round → new `vN/` folder. Never overwrite previous versions.
+2. Each version has its own isolated `plan.md`, `reports/`, `results/`.
+3. Final results stored as structured JSON; intermediate may be archived as .zip.
+4. `vN/README.md` documents what changed, key results, and lessons learned.
+5. When archiving, update this index.
