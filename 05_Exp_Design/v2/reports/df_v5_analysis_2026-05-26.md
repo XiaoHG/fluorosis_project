@@ -266,7 +266,7 @@ CE with MixUp is the simplest method — it benefits from extra epochs without a
 |--------|-----|----------|-----------|-------------|------|
 | MLTrMR | 80.19% | 75.79% | 556M | None | 2025 |
 | LD2Net | 80.00% | 79.88% | 3.3M | None | 2026 |
-| FusionDentNet | 80.00% | 79.25% | 201M | None | 2024 |
+| FusionDentNet (citation unverified, arXiv ID may belong to MLTrMR) | 80.00% | 79.25% | 201M | None | 2024 |
 | **Our V4 EDL (CV)** | **79.33% ± 3.74** | **79.02% ± 4.01** | **86M** | **Dirichlet** | 2026 |
 | **Our V5 CE (CV)** | **75.83% ± 5.23** | **75.19% ± 5.04** | **86M** | **Entropy** | 2026 |
 | **Our V5 EDL (CV)** | **72.33% ± 7.90** | **71.23% ± 8.52** | **86M** | **Dirichlet** | 2026 |

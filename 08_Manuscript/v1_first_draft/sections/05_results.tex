@@ -157,9 +157,11 @@ Table~\ref{tab:multiseed} reports 3-seed stability analysis comparing CE and EDL
 \subsubsection{5-Fold Cross-Validation}
 \label{sec:cv}
 
+Table~\ref{tab:cv} summarizes the 5-fold cross-validation results.
+
 \begin{table}[htbp]
 \centering
-\caption{5-fold cross-validation on DFID (5 $\times$ 40 test samples per fold).}
+\caption{5-fold cross-validation on DFID (5 $\times$ 40 test samples per fold). \textbf{Data source: v4 experiments}.}
 \label{tab:cv}
 \begin{tabular}{lcc}
 \toprule
@@ -290,7 +292,7 @@ Table~\ref{tab:perclass} and Figure~\ref{fig:f10} present per-class precision, r
 
 \begin{table}[htbp]
 \centering
-\caption{Per-class metrics for CE and EDL (v6 per-sample data).}
+\caption{Per-class metrics for CE and EDL. \textbf{Data source: v6 per-sample export}.}
 \label{tab:perclass}
 \begin{tabular}{lcccc|cccc}
 \toprule
@@ -329,6 +331,6 @@ EDL improves per-class F1 across all four classes compared to CE, with the large
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{figures/F9_summary.pdf}
-\caption{Summary comparison of five loss modes across all evaluation dimensions. EDL achieves the best overall performance, balancing accuracy, calibration, and uncertainty quality.}
+\caption{Summary comparison of five loss modes across all evaluation dimensions. EDL achieves the best overall performance, balancing accuracy, calibration, and uncertainty quality (see Figure~\ref{fig:f9} for a comprehensive summary).}
 \label{fig:f9}
 \end{figure}

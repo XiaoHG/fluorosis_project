@@ -24,6 +24,7 @@ from data import create_dataloaders
 from models import build_model
 from losses import CombinedLoss
 from eval import evaluate
+from utils import set_seed, load_config, compute_class_weights, EarlyStopping
 
 
 def parse_args():
@@ -35,7 +36,7 @@ def parse_args():
     p.add_argument("--lr_backbone", type=float, default=None)
     p.add_argument("--lr_head", type=float, default=None)
     p.add_argument("--lambda_orcu", type=float, default=0.5)
-    p.add_argument("--lambda_kl", type=float, default=0.1)
+    p.add_argument("--lambda_kl", type=float, default=0.07)
     p.add_argument("--orcu_t", type=float, default=3.0)
     p.add_argument("--orcu_lambda_reg", type=float, default=0.01,
                    help="Weight for ORCU hinge ordinal regularization")
@@ -47,6 +48,12 @@ def parse_args():
     p.add_argument("--num_workers", type=int, default=4)
     p.add_argument("--device", type=str, default="cuda")
     p.add_argument("--output_dir", type=str, default=None)
+    p.add_argument("--config", type=str, default=None, help="YAML config file path (overrides defaults)")
+    p.add_argument("--early_stopping_patience", type=int, default=15,
+                   help="Epochs to wait before early stop (0 = disabled)")
+    p.add_argument("--use_amp", action="store_true", help="Use automatic mixed precision (AMP)")
+    p.add_argument("--no_class_weight", action="store_true",
+                   help="Disable automatic class weighting")
     p.add_argument("--seed", type=int, default=42)
     return p.parse_args()
 
@@ -96,7 +103,14 @@ def main():
     stage_1 = args.stage_1_epochs or defaults["stage_1_epochs"]
     stage_2 = args.stage_2_epochs or defaults["stage_2_epochs"]
 
-    torch.manual_seed(args.seed)
+    set_seed(args.seed)
+
+    # Load YAML config if provided (overrides defaults)
+    yaml_config = {}
+    if args.config:
+        yaml_config = load_config(args.config)
+        if yaml_config:
+            print(f"[INFO] Loaded config from {args.config}")
 
     output_dir = args.output_dir or os.path.join(
         os.path.dirname(__file__), "checkpoints",
@@ -117,6 +131,11 @@ def main():
     model = build_model(task=args.task, mode=args.mode)
     model.to(device)
     print(f"[INFO] Model: {sum(p.numel() for p in model.parameters()):,} params")
+
+    # AMP scaler
+    scaler = torch.cuda.amp.GradScaler() if args.use_amp and device.type == "cuda" else None
+    if scaler:
+        print("[INFO] AMP enabled")
 
     # Criterion — mode-dependent
     mode = args.mode
@@ -181,6 +200,20 @@ def main():
     # Training loop
     best_val_acc = 0.0
     history = []
+    early_stopper = EarlyStopping(
+        patience=args.early_stopping_patience, mode='max', min_delta=1e-4
+    ) if args.early_stopping_patience > 0 else None
+    if early_stopper:
+        print(f"[INFO] EarlyStopping enabled (patience={args.early_stopping_patience})")
+
+    # Compute class weights for imbalanced datasets
+    if not args.no_class_weight:
+        all_train_labels = torch.tensor([train_loader.dataset[i][1]
+                                         for i in range(len(train_loader.dataset))])
+        class_weights = compute_class_weights(all_train_labels, num_classes=4)
+        print(f"[INFO] Class weights: {class_weights.tolist()}")
+    else:
+        class_weights = None
 
     for epoch in range(epochs):
         model.train()
@@ -190,11 +223,23 @@ def main():
 
         for images, targets in train_loader:
             images, targets = images.to(device), targets.to(device)
-            alpha, z = model(images)
-            loss, loss_info = criterion(alpha, z, targets, epoch)
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+
+            if scaler:
+                with torch.cuda.amp.autocast():
+                    alpha, z = model(images)
+                    loss, loss_info = criterion(alpha, z, targets, epoch)
+                optimizer.zero_grad()
+                scaler.scale(loss).backward()
+                scaler.step(optimizer)
+                scaler.update()
+            else:
+                alpha, z = model(images)
+                loss, loss_info = criterion(alpha, z, targets, epoch)
+                optimizer.zero_grad()
+                loss.backward()
+                # Gradient clipping for stability (especially SF small dataset)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                optimizer.step()
 
             epoch_stage = loss_info.get("stage", 0)
             for k in epoch_losses:
@@ -210,6 +255,13 @@ def main():
         is_best = val_metrics["acc"] > best_val_acc
         if is_best:
             best_val_acc = val_metrics["acc"]
+
+        # Early stopping check
+        if early_stopper:
+            if early_stopper(val_metrics["acc"], epoch, model):
+                print(f"[EarlyStop] No improvement for {args.early_stopping_patience} epochs. "
+                      f"Best epoch: {early_stopper.best_epoch}, Best val acc: {early_stopper.best_score:.4f}")
+                break
 
         history.append({
             "epoch": epoch, "stage": epoch_stage,
@@ -236,9 +288,13 @@ def main():
         if is_best:
             torch.save(ckpt, os.path.join(output_dir, "best.pt"))
 
-    # Final test evaluation
-    best_ckpt = torch.load(os.path.join(output_dir, "best.pt"), map_location=device)
-    model.load_state_dict(best_ckpt["model_state_dict"])
+    # Restore best model (from EarlyStopping if used, otherwise from disk)
+    if early_stopper and early_stopper.best_state_dict is not None:
+        early_stopper.restore(model)
+        print(f"[INFO] Restored best model from EarlyStopping (epoch {early_stopper.best_epoch})")
+    else:
+        best_ckpt = torch.load(os.path.join(output_dir, "best.pt"), map_location=device, weights_only=False)  # weights_only=False needed for optimizer state
+        model.load_state_dict(best_ckpt["model_state_dict"])
     test_metrics = evaluate(model, test_loader, device)
 
     print(f"\n[Test Results]")

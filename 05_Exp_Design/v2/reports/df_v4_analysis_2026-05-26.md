@@ -198,15 +198,15 @@ V4 EDL produces less evidence (9.20 vs 11.62) -- stronger KL penalty suppresses 
 |--------|-----|----------|-----------|-------------|------|
 | MLTrMR | 80.19% | 75.79% | 556M | None | 2025 |
 | LD2Net | 80.00% | 79.88% | 3.3M | None | 2026 |
-| FusionDentNet | 80.00% | 79.25% | 201M | None | 2024 |
+| FusionDentNet (citation unverified, arXiv ID may belong to MLTrMR) | 80.00% | 79.25% | 201M | None | 2024 |
 | **Our V4 EDL (CV mean)** | **79.33% +- 3.74** | **79.02% +- 4.01** | **86M** | **Dirichlet** | 2026 |
 | **Our V4 EDL (best fold)** | **85.00%** | **85.13%** | **86M** | **Dirichlet** | 2026 |
 | **Our V4 EDL+ORCU (best)** | **81.67%** | **79.84%** | **86M** | **Dirichlet** | 2026 |
 | Our V4 SORD (CV) | 77.67% +- 4.90 | 76.50% +- 4.89 | 86M | Entropy | 2026 |
 
-**V4 EDL at 79.33% is within 1pp of all three top competitors** (MLTrMR 80.19%, LD2Net 80.00%, FusionDentNet 80.00%), while using 43-85% fewer parameters than MLTrMR/FusionDentNet and providing Dirichlet uncertainty that none of the competitors offer.
+**V4 EDL at 79.33% is within 1pp of all three top competitors** (MLTrMR 80.19%, LD2Net 80.00%, FusionDentNet (citation unverified, arXiv ID may belong to MLTrMR) 80.00%), while using 43-85% fewer parameters than MLTrMR/FusionDentNet (citation unverified, arXiv ID may belong to MLTrMR) and providing Dirichlet uncertainty that none of the competitors offer.
 
-**Macro F1 at 79.02% beats MLTrMR (75.79%)** and is neck-and-neck with LD2Net (79.88%) and FusionDentNet (79.25%).
+**Macro F1 at 79.02% beats MLTrMR (75.79%)** and is neck-and-neck with LD2Net (79.88%) and FusionDentNet (citation unverified, arXiv ID may belong to MLTrMR) (79.25%).
 
 ---
 
@@ -256,7 +256,7 @@ V4 EDL produces less evidence (9.20 vs 11.62) -- stronger KL penalty suppresses 
 ### For Paper Writing
 
 1. **Report EDL CV as primary result**: 79.33% +- 3.74 Acc, 79.02% +- 4.01 Macro F1, QWK=0.905 +- 0.017
-2. **Emphasize uncertainty advantage**: At near-SOTA accuracy, V4 EDL uniquely provides Dirichlet uncertainty (AUROC_u=0.664); none of MLTrMR/LD2Net/FusionDentNet offer this
+2. **Emphasize uncertainty advantage**: At near-SOTA accuracy, V4 EDL uniquely provides Dirichlet uncertainty (AUROC_u=0.664); none of MLTrMR/LD2Net/FusionDentNet (citation unverified, arXiv ID may belong to MLTrMR) offer this
 3. **Report EDL best fold (85.00%) as upper bound** alongside conservative CV mean
 4. **Use kl=0.05 (80.00%) as the illustrative single-run** for method description
 

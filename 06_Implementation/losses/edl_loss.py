@@ -20,7 +20,12 @@ class EDLLoss(nn.Module):
 
     def forward(self, alpha, targets, epoch=None, total_epochs=None):
         K = alpha.shape[-1]
-        y = F.one_hot(targets, num_classes=K).float()
+        # Support both hard labels (int tensor) and soft labels (float tensor)
+        if targets.dim() == 1:
+            y = F.one_hot(targets, num_classes=K).float()
+        else:
+            # Soft labels: already probability vectors, shape (B, K)
+            y = targets.float()
 
         S = alpha.sum(dim=-1, keepdim=True)
         ll = (y * (torch.digamma(S) - torch.digamma(alpha))).sum(dim=-1)
@@ -53,5 +58,5 @@ def edl_metrics(alpha, targets):
     return {
         "acc": acc.item(),
         "mean_uncertainty": u.mean().item(),
-        "mean_evidence": (alpha - 1.0).sum(dim=-1).mean().item(),
+        "mean_total_evidence": (alpha - 1.0).sum(dim=-1).mean().item(),
     }

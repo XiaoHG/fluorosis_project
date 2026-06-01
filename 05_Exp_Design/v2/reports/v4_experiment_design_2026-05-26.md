@@ -125,7 +125,7 @@ Per-sample .npz includes: y_true, y_pred, prob, logits (alpha/evidence/u for EDL
 |--------|-----|----------|-------------|-----|-----|--------|-------------|
 | MLTrMR (2025) | 80.19% | 75.79% | — | 0.813 | — | 556M | None |
 | LD2Net (2026) | 80.00% | 79.88% | — | — | — | 3.3M | None |
-| FusionDentNet (2024) | 80.00% | 79.25% | — | — | — | 201M | None |
+| FusionDentNet (citation unverified, arXiv ID may belong to MLTrMR) (2024) | 80.00% | 79.25% | — | — | — | 201M | None |
 | Ours CE (V4) | TBD | TBD | TBD | TBD | TBD | 86M | Entropy |
 | Ours SORD (V4) | TBD | TBD | TBD | TBD | TBD | 86M | Entropy |
 | **Ours EDL (V4)** | **TBD ★** | TBD | TBD | TBD | TBD | 86M | **Dirichlet** |

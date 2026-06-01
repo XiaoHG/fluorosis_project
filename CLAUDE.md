@@ -91,6 +91,22 @@ Target journal: Medical Image Analysis (MedIA, Elsevier). Manuscript in `08_Manu
 - Update SOTA comparison tables
 **Key knowledge:** DFID benchmark, fluorosis grading (Dean's scale), medical image classification, uncertainty quantification
 
+### Innovation Agent (`inno`)
+**Role:** Identify research gaps and propose novel methodological contributions.
+**Responsibilities:**
+- Analyze literature for unexplored combinations
+- Propose architectural innovations (e.g., shared logit bridge)
+- Maintain innovation log in `03_Innovation/`
+**Key knowledge:** EDL, ORCU, medical imaging, uncertainty quantification, ordinal regression
+
+### Model Design Agent (`mod`)
+**Role:** Design and document model architecture specifications.
+**Responsibilities:**
+- Maintain architecture docs in `04_Model_Design/`
+- Specify EvidenceHead, OrdinalHead, backbone integration
+- Document design decisions and trade-offs
+**Key knowledge:** ViT, ResNet, Dirichlet distributions, Coral ordinal classification
+
 ### Review Agent (`review`)
 **Role:** Review manuscript and code for quality and correctness.
 **Responsibilities:**
@@ -118,15 +134,17 @@ Target journal: Medical Image Analysis (MedIA, Elsevier). Manuscript in `08_Manu
 
 **Best results (v2 = V4 experiments):**
 - EDL CV: Acc 79.33% +/- 3.74, QWK 0.905 +/- 0.017, ECE 0.173 (5-fold)
-- EDL single best (V1 seed 42): Acc 83.33%, QWK 0.936, ECE 0.072
-- EDL+ORCU CV: Acc 75.00% +/- 5.16, best CV stability (QWK CV 0.36%)
+- EDL single best (V1 seed 42): Acc 83.33%, QWK 0.938, ECE 0.072
+- EDL+ORCU CV: Acc 75.00% +/- 5.16 (QWK CV range: 1.89%-3.00% across methods)
+- **Most stable CV:** EDL has lowest QWK CV (1.89%), not EDL+ORCU (2.72%)
 
 **Competitors:** MLTrMR (80.19%, 556M), LD2Net (80.00%, 3.3M)
 
 **Next steps (V6 → v3/):**
-1. DF V6: kl=0.07, 10-fold CV, fix KL annealing from V5 regression
-2. SF: ResNet-50 + EDL+ORCU with multi-rater soft labels
-3. Paper: integrate V6 results, finalize figures, submit to MedIA
+1. DF V6: kl=0.07, 10-fold CV, fix KL annealing from V5 regression, implement log-barrier ORCU
+2. SF: ResNet-50 + EDL+ORCU with multi-rater soft labels, EarlyStopping, class weighting
+3. Code: fix ORCU hinge→log-barrier, add EarlyStopping, CUDA determinism, AMP, YAML config loading
+4. Paper: resolve version inconsistency across tables, recompile PDF, fill grant numbers, fix figures symlink
 
 ## Key Commands
 

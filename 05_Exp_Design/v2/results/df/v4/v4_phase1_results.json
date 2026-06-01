@@ -243,7 +243,7 @@
       "pct_unimodal": 0.6166666666666667,
       "u_ece": 0.2969411492347717,
       "auroc_u": 0.5,
-      "mean_uncertainty": NaN,
+      "mean_uncertainty": null,
       "mean_evidence": 0.0,
       "confusion_matrix": [
         [

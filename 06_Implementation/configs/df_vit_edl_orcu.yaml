@@ -37,7 +37,7 @@ scheduler:
 
 loss:
   lambda_orcu: 0.5
-  lambda_kl: 0.1
+  lambda_kl: 0.07
   orcu_t: 3.0
 
 stages:

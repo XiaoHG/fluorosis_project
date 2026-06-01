@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from models import build_model
 from losses import CombinedLoss
 from eval import evaluate
+from torch.optim.lr_scheduler import CosineAnnealingLR, LinearLR, SequentialLR
 
 
 def kfold_split(dataset, k=5, seed=42):
@@ -51,6 +52,9 @@ def train_one_fold(args, fold, train_indices, val_indices, device):
     stage_2 = args.stage_2_epochs or defs["stage_2_epochs"]
 
     torch.manual_seed(args.seed + fold)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(args.seed + fold)
+        torch.cuda.manual_seed_all(args.seed + fold)
 
     from data.dataset import DFDataset, SFDataset, get_transforms
     DS = DFDataset if args.task == "df" else SFDataset
@@ -113,6 +117,12 @@ def train_one_fold(args, fold, train_indices, val_indices, device):
         {"params": head_params, "lr": args.lr_head or defs["lr_head"]},
     ], weight_decay=defs["weight_decay"])
 
+    # LR scheduler (matches train.py)
+    warmup_epochs = defs["warmup_epochs"]
+    warmup_sched = LinearLR(optimizer, start_factor=0.1, total_iters=warmup_epochs)
+    cosine_sched = CosineAnnealingLR(optimizer, T_max=epochs - warmup_epochs)
+    scheduler = SequentialLR(optimizer, schedulers=[warmup_sched, cosine_sched], milestones=[warmup_epochs])
+
     best_val_acc = 0.0
     best_state = None
 
@@ -124,7 +134,10 @@ def train_one_fold(args, fold, train_indices, val_indices, device):
             loss, _ = criterion(alpha, z, targets, epoch)
             optimizer.zero_grad()
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
+
+        scheduler.step()
 
         val_metrics = evaluate(model, val_loader, device)
         if val_metrics["acc"] > best_val_acc:

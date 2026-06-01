@@ -15,7 +15,6 @@ description: Bug fix release — build_model dispatch fix + LD2Net竞品分析 +
 | 1 | MLTrMR (Xu) | JVCIR | 2025 | 80.19% | 75.79% | 556M | Masked Latent Transformer |
 | 2 | LD2Net (Li) | JRTIP | 2026 | 80.00% | 79.88% | 3.31M | 轻量化 depthwise separable |
 | 3 | FusionDentNet | — | 2024 | 80.00% | 79.25% | 201M | 牙科专用网络 |
-| 4 | HiFuse | — | 2024 | 78.23% | 70.45% | 164M | CNN+Transformer 混合 |
 
 **关键事实**: MLTrMR 和 LD2Net 来自同一课题组 (贵州大学 Wu 组, 通讯作者 Yun Wu)。两者均使用 DFID 数据集, 与我们完全相同。→ **直接可比, 无需跨数据集担忧。**
 
@@ -54,7 +53,6 @@ description: Bug fix release — build_model dispatch fix + LD2Net竞品分析 +
 | MLTrMR (Xu 2025) | 80.19% | 75.79% | 0.813 | — | 556M | 无 |
 | LD2Net (Li 2026) | 80.00% | 79.88% | — | — | **3.31M** | 无 |
 | FusionDentNet (2024) | 80.00% | 79.25% | — | — | 201M | 无 |
-| HiFuse (2024) | 78.23% | 70.45% | — | — | 164M | 无 |
 | **Ours CE** | **81.67%** | **80.85%** | **0.933** | **0.121** | 86M | Entropy |
 | **Ours EDL** | **83.33%** | **82.78%** | **0.938** | **0.072** | 86M | **Dirichlet** |
 
@@ -62,7 +60,6 @@ description: Bug fix release — build_model dispatch fix + LD2Net竞品分析 +
 - 竞品天花板 ≈ 80% Acc (3 种不同架构均卡在此线)
 - 我们 CE baseline (81.7%) 已超所有竞品
 - EDL (83.3%) 比竞品最佳高 +3.1pp Acc, +2.9pp F1
-- **QWK**: MLTrMR 0.813 vs 我们 0.938 (+0.125) — ordinal 建模差异显著。LD2Net/FusionDentNet/HiFuse 未报告 QWK
 
 ### 2.2 竞品 ViT baseline 异常
 
@@ -367,7 +364,6 @@ v5 于同日跑完，但结果全面退化。**直接使用 v2.2 数据作为论
 | 2 | 5-Fold CV (5 种方法) | ✅ 第三节 |
 | 3 | Bug 修复验证 (CE ≠ EDL+ORCU) | ✅ 第五节 |
 | 4 | 跨版本对比 (v2.0/v2.1/v2.2) | ✅ 第七节 |
-| 5 | 竞品对比表 (MLTrMR/LD2Net/FusionDentNet/HiFuse) | ✅ 第二节 |
 
 ### 12.2 待执行 ⬜
 
@@ -382,7 +378,6 @@ v5 于同日跑完，但结果全面退化。**直接使用 v2.2 数据作为论
 | # | 任务 | 说明 |
 |---|------|------|
 | 4 | ViT baseline 差异解释 | 竞品 ViT 44-74% vs 我们 81.7%, 归因于 ImageNet-21k 预训练 |
-| 5 | 竞品 QWK 缺失标注 | LD2Net/FusionDentNet/HiFuse 未报告 QWK, 论文中注明
 
 ---
 

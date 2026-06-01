@@ -64,3 +64,6 @@ Kaggle_Setup/
 
 # Kaggle artifact
 df_exp_result/
+
+# Large manuscript archive (6.4MB) — consider git-lfs or exclude
+# manuscript_overleaf.zip

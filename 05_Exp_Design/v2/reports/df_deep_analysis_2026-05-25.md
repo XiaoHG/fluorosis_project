@@ -14,7 +14,7 @@
 |--------|--------|----------|----------|-----|-----|-------|
 | **Competitor** | MLTrMR | 80.19% | — | — | — | Published SOTA on DFID |
 | **Competitor** | LD2Net | 80.00% | — | — | — | |
-| **Competitor** | FusionDentNet | 80.00% | — | — | — | |
+| **Competitor** | FusionDentNet (citation unverified, arXiv ID may belong to MLTrMR) | 80.00% | — | — | — | |
 | **Our v1** | CE | 81.67% | — | — | 0.121 | Beats all competitors |
 | **Our v1** | EDL | **83.33%** | — | — | 0.072 | Our SOTA |
 | **Our v2** | CE | 58.33% | 0.595 | 0.771 | 0.321 | **Below all competitors** |
@@ -207,7 +207,7 @@ The SORD term softens targets, which helps ordinal learning. But the log-barrier
 
 ### 4.5 The DFID Dataset Ceiling
 
-If 3 independent research groups (MLTrMR, LD2Net, FusionDentNet) all converge to ~80% accuracy on DFID with different architectures, and our best methods (Cumulative 80.00%, EDL 83.33% v1) land in the same range, the dataset itself may have a Bayes error rate around 15–20%.
+If 3 independent research groups (MLTrMR, LD2Net, FusionDentNet (citation unverified, arXiv ID may belong to MLTrMR)) all converge to ~80% accuracy on DFID with different architectures, and our best methods (Cumulative 80.00%, EDL 83.33% v1) land in the same range, the dataset itself may have a Bayes error rate around 15–20%.
 
 Given single-dentist annotation with no inter-rater reliability data, some fraction of "errors" may actually be cases where a second dentist would disagree with the label. Grade 1 (mild fluorosis) being universally the hardest class (F1: 0.333–0.857 range) supports this — the Normal/Mild boundary is genuinely ambiguous.
 

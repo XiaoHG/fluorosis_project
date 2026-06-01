@@ -43,7 +43,7 @@
 ### 创新2：EDL与ORCU在氟中毒诊断中的首次应用
 
 **创新发现过程：**
-现有氟中毒DL诊断文献（MLTrMR 2025、LD2Net 2026、FusionDentNet 2024）存在三个共性缺陷：
+现有氟中毒DL诊断文献（MLTrMR 2025、LD2Net 2026、FusionDentNet (citation unverified, arXiv ID may belong to MLTrMR) 2024）存在三个共性缺陷：
 1. 全部使用标准交叉熵（CE）损失——将氟中毒4个等级视为名义类别，丢弃了有序结构
 2. 全部只输出点估计——无法量化预测不确定性
 3. 全部使用多数投票的one-hot标签——丢弃了标注本身的模糊性
@@ -233,7 +233,7 @@ Fold 3 = 85.00%（Macro F1 85.13%）是V4最佳单折，接近该数据集的实
 |------|----------|----------|-----|--------|-----------|---------|------|
 | MLTrMR | 80.19% | 75.79% | — | 556M | ❌ | ❌ | 2025 |
 | LD2Net | 80.00% | 79.88% | — | 3.3M | ❌ | ❌ | 2026 |
-| FusionDentNet | 80.00% | 79.25% | — | 201M | ❌ | ❌ | 2024 |
+| FusionDentNet (citation unverified, arXiv ID may belong to MLTrMR) | 80.00% | 79.25% | — | 201M | ❌ | ❌ | 2024 |
 | **Our EDL (V1 s42)** | **83.33%** | — | **0.936** | 86M | ✅ Dirichlet | ✅ ORCU | 2026 |
 | **Our EDL (V4 CV)** | **79.33%±3.7** | **79.02%±4.0** | **0.905** | 86M | ✅ Dirichlet | ✅ KL | 2026 |
 | **Our EDL (V4 best fold)** | **85.00%** | **85.13%** | — | 86M | ✅ Dirichlet | ✅ KL | 2026 |
@@ -247,7 +247,7 @@ Fold 3 = 85.00%（Macro F1 85.13%）是V4最佳单折，接近该数据集的实
                    ▲
                    │  ● Our EDL (V1)
                    │  ▲ Our EDL (V4 CV)
-                   │  ■ MLTrMR / LD2Net / FusionDentNet
+                   │  ■ MLTrMR / LD2Net / FusionDentNet (citation unverified, arXiv ID may belong to MLTrMR)
                    │
     不确定性 ──────┼────── 有序建模
                    │
@@ -262,7 +262,7 @@ Fold 3 = 85.00%（Macro F1 85.13%）是V4最佳单折，接近该数据集的实
 ### 5.3 多维度对比分析
 
 **精度维度：**
-- V1 EDL单次83.33%：比MLTrMR高**+3.14pp**，比LD2Net/FusionDentNet高**+3.33pp**
+- V1 EDL单次83.33%：比MLTrMR高**+3.14pp**，比LD2Net/FusionDentNet (citation unverified, arXiv ID may belong to MLTrMR)高**+3.33pp**
 - V4 EDL CV 79.33%：在保守估计下与前三名竟品处于同一梯队（差异<1pp，在±3.74标准差内）
 - V4 EDL best fold 85.00%：远超所有竟品，证明模型潜力的上限
 - Macro F1 79.02%超过MLTrMR的75.79%（+3.23pp），与LD2Net的79.88%持平
@@ -274,7 +274,7 @@ Fold 3 = 85.00%（Macro F1 85.13%）是V4最佳单折，接近该数据集的实
 4. **初始化鲁棒性：** EDL CV仅4.3%（vs CE 31.4%），在实际部署中提供更可预测的行为
 
 **效率维度：**
-- 86M参数 < MLTrMR 556M的**1/6.5**，< FusionDentNet 201M的**1/2.3**
+- 86M参数 < MLTrMR 556M的**1/6.5**，< FusionDentNet (citation unverified, arXiv ID may belong to MLTrMR) 201M的**1/2.3**
 - LD2Net的3.3M在移动端部署有独特优势，但不提供不确定性量化
 - 我们的框架是backbone-agnostic的：与任何骨干兼容，包括轻量模型
 
@@ -307,7 +307,7 @@ Fold 3 = 85.00%（Macro F1 85.13%）是V4最佳单折，接近该数据集的实
   └─ 四大贡献陈述
 
 2 相关工作 (Related Work)
-  ├─ 2.1 氟中毒深度学习诊断（MLTrMR, LD2Net, FusionDentNet）
+  ├─ 2.1 氟中毒深度学习诊断（MLTrMR, LD2Net, FusionDentNet (citation unverified, arXiv ID may belong to MLTrMR)）
   ├─ 2.2 证据深度学习（Sensoy, MEDL, 医学应用）
   ├─ 2.3 有序回归与校准（CLM, CORN, SORD, ORCU）
   └─ 2.4 医学影像校准与不确定性（ECE, Temp Scaling, MC Dropout vs EDL）
@@ -435,7 +435,7 @@ CE/Cum/SORD: epochs=75, MixUp α=0.2, patience=15
 │                                                             │
 │   vs MLTrMR:       +3.14pp (83.33 vs 80.19)                │
 │   vs LD2Net:       +3.33pp (83.33 vs 80.00)                │
-│   vs FusionDentNet: +3.33pp                               │
+│   vs FusionDentNet (citation unverified, arXiv ID may belong to MLTrMR): +3.33pp                               │
 │                                                             │
 │   参数量：86M < MLTrMR 556M 的 1/6.5                       │
 │                                                             │

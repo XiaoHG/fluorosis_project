@@ -20,7 +20,7 @@ class CombinedLoss(nn.Module):
         self,
         num_classes: int = 4,
         lambda_orcu: float = 0.05,
-        lambda_kl: float = 0.02,
+        lambda_kl: float = 0.1,
         kl_anneal_cap: float = 0.5,
         orcu_t: float = 3.0,
         orcu_lambda_reg: float = 0.005,
