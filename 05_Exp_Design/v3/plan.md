@@ -1,87 +1,117 @@
-# V6 Experiment Plan
+# V6 Experiment Plan — DF Only
 
 **Version:** v3
 **Date:** 2026-06-01
-**Status:** Planning
-**Objective:** DF V6 experiments + SF multi-rater soft labels + code infrastructure improvements
+**Status:** Ready
+**Scope:** DF (Dental Fluorosis) only — ViT-Base (86M), 200 intraoral photos, 4-class
+**Objective:** Beat MLTrMR (80.19%) and LD2Net (80.00%) with log-barrier ORCU + 5-seed stability
 
 ## Background
 
-V4 achieved best results: EDL CV Acc 79.33% ± 3.74, QWK 0.905 ± 0.017. V5 regressed due to KL annealing issues. V6 aims to:
-1. Fix KL annealing from V5 regression
-2. Implement log-barrier ORCU (replace hinge approximation)
-3. 10-fold CV for more stable evaluation
-4. Complete SF experiments with multi-rater soft labels
+V4 best: EDL CV Acc 79.33% ± 3.74, QWK 0.905 ± 0.017. V5 regressed (KL annealing).
+V6 fixes: log-barrier ORCU, kl=0.07, 10-fold CV, 5 seeds.
 
-## Experiment Matrix
+**Code infrastructure (Phase 1) already completed in audit:**
+- ✅ ORCU log-barrier (replaced hinge)
+- ✅ EarlyStopping (patience-based, best-model restoration)
+- ✅ CUDA determinism (set_seed)
+- ✅ YAML config loading (--config)
+- ✅ AMP mixed precision (--use_amp)
+- ✅ Gradient clipping (max_norm=1.0)
+- ✅ lambda_kl unified to 0.07
 
-### Phase 1: Code Infrastructure (Priority: CRITICAL)
+## DF V6 Experiment Matrix
 
-| # | Task | Description |
-|---|------|-------------|
-| 1.1 | ORCU log-barrier | Replace ReLU hinge with log-barrier penalty per design doc |
-| 1.2 | EarlyStopping | Add patience-based early stopping with best-model restoration |
-| 1.3 | CUDA determinism | Add seed_all(), cudnn.deterministic, cudnn.benchmark |
-| 1.4 | YAML config loading | Parse YAML configs in train.py (currently hardcoded defaults) |
-| 1.5 | Class weighting | Add class_weight to EDL loss for imbalanced SF data |
-| 1.6 | AMP support | Add torch.cuda.amp autocast + GradScaler |
-| 1.7 | SF soft labels | Load 5-rater annotations, support soft-label EDL training |
+### Phase 2: Single-Seed Baseline (5 methods × seed=42, ~1.5h)
 
-### Phase 2: DF V6 Experiments
+Quick baseline with V6 defaults to verify no regressions.
 
-| # | Mode | KL | ORCU | Folds | Seeds | Notes |
-|---|------|-----|------|-------|-------|-------|
-| 2.1 | CE | - | - | 10 | 42, 123, 456 | Baseline |
-| 2.2 | Cumulative | - | - | 10 | 42, 123, 456 | Coral baseline |
-| 2.3 | SORD | - | - | 10 | 42, 123, 456 | SORD baseline |
-| 2.4 | EDL | 0.07 | - | 10 | 42, 123, 456, 789, 1024 | KL annealing fix |
-| 2.5 | EDL+ORCU | 0.07 | 0.10 (log-barrier) | 10 | 42, 123, 456, 789, 1024 | New log-barrier |
+| # | Mode | KL | ORCU | Seed | Notes |
+|---|------|-----|------|------|-------|
+| 2.1 | CE | - | - | 42 | Standard baseline |
+| 2.2 | Cumulative | - | - | 42 | Coral K-1 BCE |
+| 2.3 | SORD | - | - | 42 | Soft ordinal encoding |
+| 2.4 | EDL | 0.07 | - | 42 | KL annealing fix |
+| 2.5 | EDL+ORCU | 0.07 | 0.10 (log-barrier) | 42 | New log-barrier |
 
-**Key changes from V5:**
-- KL lambda: 0.1 → 0.07 (milder regularization)
-- ORCU: hinge → log-barrier (matches design doc)
-- Folds: 5 → 10 (more stable CV estimates)
-- Seeds: add 789, 1024 for 5-seed stability analysis
+### Phase 3: Hyperparameter Sweep (~3h)
 
-### Phase 3: SF V2 Experiments
+#### 3A: EDL KL Lambda Sweep
 
-| # | Mode | Backbone | Labels | Notes |
-|---|------|----------|--------|-------|
-| 3.1 | CE | ResNet-50 | Hard (majority vote) | Baseline |
-| 3.2 | Cumulative | ResNet-50 | Hard | Coral |
-| 3.3 | EDL | ResNet-50 | Hard | EDL baseline |
-| 3.4 | EDL | ResNet-50 | Soft (5-rater) | **NEW**: soft-label EDL |
-| 3.5 | EDL+ORCU | ResNet-50 | Hard | With log-barrier |
-| 3.6 | EDL+ORCU | ResNet-50 | Soft (5-rater) | **NEW**: full pipeline |
+| KL | Seeds |
+|----|-------|
+| 0.03, 0.05, **0.07**, 0.10, 0.15 | 42, 123, 456 |
 
-### Phase 4: Analysis & Ablation
+9 runs. Find best KL for CV calibration.
 
-| # | Task | Description |
-|---|------|-------------|
-| 4.1 | Lambda sweep | kl ∈ {0.02, 0.05, 0.07, 0.10, 0.15}, orcu ∈ {0.05, 0.10, 0.20} |
-| 4.2 | A6 ablation | log-barrier vs hinge comparison (requires ORCU loss fix first) |
-| 4.3 | Seed stability | 5-seed boxplots for Acc, QWK, ECE |
-| 4.4 | SF soft vs hard | Compare soft-label EDL vs hard-label EDL on SF |
+#### 3B: EDL+ORCU Lambda Sweep
+
+| ORCU λ | KL | Seeds |
+|---------|-----|-------|
+| 0.05, **0.10**, 0.20 | 0.07 | 42, 123, 456 |
+
+9 runs. Find best ORCU strength with log-barrier.
+
+### Phase 4: Multi-Seed Stability (5 seeds, ~5h)
+
+| Mode | KL | ORCU | Seeds |
+|------|-----|------|-------|
+| CE | - | - | 42, 123, 456, 789, 1024 |
+| Cumulative | - | - | 42, 123, 456, 789, 1024 |
+| SORD | - | - | 42, 123, 456, 789, 1024 |
+| **EDL** | **0.07** | - | **42, 123, 456, 789, 1024** |
+| **EDL+ORCU** | **0.07** | **0.10 (log-barrier)** | **42, 123, 456, 789, 1024** |
+
+25 runs. Compare 3-seed vs 5-seed stability.
+
+### Phase 5: 10-Fold Cross-Validation (~15h)
+
+| Mode | KL | ORCU | Folds |
+|------|-----|------|-------|
+| CE | - | - | 10 |
+| Cumulative | - | - | 10 |
+| SORD | - | - | 10 |
+| **EDL** | **0.07** | - | **10** |
+| **EDL+ORCU** | **0.07** | **0.10 (log-barrier)** | **10** |
+
+50 folds total. Paired t-tests (McNemar for paper).
+
+### Phase 6: A6 Ablation — Log-Barrier vs Hinge (~1h)
+
+| Mode | KL | ORCU λ | Regularizer | Seeds |
+|------|-----|--------|-------------|-------|
+| EDL+ORCU (log-barrier) | 0.07 | 0.10 | **log-barrier** | 42, 123, 456 |
+| EDL+ORCU (hinge) | 0.07 | 0.10 | hinge | 42, 123, 456 |
+
+6 runs. **Key paper contribution:** prove log-barrier > hinge for unimodality.
+
+## Run Summary
+
+| Phase | Runs | Est. Time | Priority |
+|-------|------|-----------|----------|
+| Phase 2: Baseline | 5 | ~1.5h | HIGH |
+| Phase 3: Sweeps | 18 | ~3h | HIGH |
+| Phase 4: Multi-Seed | 25 | ~5h | HIGH |
+| Phase 5: 10-Fold CV | 50 | ~15h | **CRITICAL** |
+| Phase 6: A6 Ablation | 6 | ~1h | MEDIUM |
+| **Total** | **104** | **~25h** | |
 
 ## Success Criteria
 
-- DF V6 EDL 10-fold CV Acc > 80% (exceed MLTrMR 80.19%)
-- QWK > 0.91 (maintain or exceed V4 0.905)
-- ECE < 0.15 (improve calibration from V4 0.173)
-- Log-barrier ORCU shows better unimodality than hinge
-- SF soft-label EDL outperforms hard-label EDL
+| Tier | Acc (10-fold CV) | QWK | ECE | Status |
+|------|-----------------|-----|-----|--------|
+| **S** | ≥ 82% | ≥ 0.92 | < 0.12 | Paper-ready SOTA, beats all by ≥1.8pp |
+| **A** | ≥ 80% | ≥ 0.91 | < 0.15 | Beats all competitors |
+| B | ≥ 78% | ≥ 0.90 | < 0.18 | Competitive |
+| C | < 78% | < 0.90 | > 0.18 | Investigate |
 
-## Timeline
+**Key metric:** 10-fold CV Acc > 80% = beats MLTrMR (80.19%) and LD2Net (80.00%).
 
-| Phase | Duration | Priority |
-|-------|----------|----------|
-| Phase 1: Infrastructure | 2-3 days | CRITICAL |
-| Phase 2: DF V6 | 3-4 days | HIGH |
-| Phase 3: SF V2 | 2-3 days | HIGH |
-| Phase 4: Analysis | 1-2 days | MEDIUM |
+## Competitors (DF Only)
 
-## Dependencies
-
-- Phase 2 depends on Phase 1.1 (log-barrier), 1.3 (determinism), 1.4 (YAML config)
-- Phase 3 depends on Phase 1.2 (EarlyStopping), 1.5 (class weighting), 1.7 (soft labels)
-- Phase 4 depends on Phase 2 and Phase 3 completion
+| Method | Acc | Params | Uncertainty | Ordinal |
+|--------|-----|--------|-------------|---------|
+| MLTrMR (2025) | 80.19% | 556M | None | None |
+| LD2Net (2026) | 80.00% | 3.3M | None | None |
+| **Ours EDL (V4)** | **79.33% ± 3.74** | **86M** | **Dirichlet** | **Implicit** |
+| **Ours EDL+ORCU (V6 target)** | **>80%** | **86M** | **Dirichlet** | **Log-barrier** |

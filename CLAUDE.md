@@ -141,10 +141,9 @@ Target journal: Medical Image Analysis (MedIA, Elsevier). Manuscript in `08_Manu
 **Competitors:** MLTrMR (80.19%, 556M), LD2Net (80.00%, 3.3M)
 
 **Next steps (V6 → v3/):**
-1. DF V6: kl=0.07, 10-fold CV, fix KL annealing from V5 regression, implement log-barrier ORCU
-2. SF: ResNet-50 + EDL+ORCU with multi-rater soft labels, EarlyStopping, class weighting
-3. Code: fix ORCU hinge→log-barrier, add EarlyStopping, CUDA determinism, AMP, YAML config loading
-4. Paper: resolve version inconsistency across tables, recompile PDF, fill grant numbers, fix figures symlink
+1. DF V6: kl=0.07, 10-fold CV, 5 seeds, log-barrier ORCU, A6 ablation
+2. Paper: integrate V6 results, finalize figures, submit to MedIA
+3. SF (deferred): ResNet-50 + EDL+ORCU with multi-rater soft labels (future work)
 
 ## Key Commands
 
