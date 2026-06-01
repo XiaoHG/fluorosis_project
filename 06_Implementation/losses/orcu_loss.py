@@ -12,6 +12,7 @@ Uses a smooth log-barrier function with linear tail (t parameter controls barrie
 providing a differentiable and well-behaved regularization surface compared to hinge loss.
 """
 import torch
+import math
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -47,7 +48,7 @@ def log_barrier_penalty(r_k, t):
     log_zone = -(1.0 / t) * torch.log(-r_k)
 
     # Linear tail zone: r_k >= threshold (safely satisfied)
-    linear_zone = t * r_k - (1.0 / t) * torch.log(1.0 / (t ** 2)) + t
+    linear_zone = t * r_k - (1.0 / t) * math.log(1.0 / (t ** 2)) + t
 
     return torch.where(r_k <= threshold, log_zone, linear_zone)
 
