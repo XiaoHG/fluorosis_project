@@ -37,7 +37,7 @@ class DFDataset(Dataset):
                     break
             if img_dir is None:
                 raise FileNotFoundError(f"DF images not found for grade '{grade_name}' under root={root}")
-            files = sorted([f for f in os.listdir(img_dir) if f.endswith(".png")])
+            files = sorted([f for f in os.listdir(img_dir) if f.lower().endswith((".png", ".jpg", ".jpeg"))])
             for fname in files:
                 self.samples.append({
                     "path": os.path.join(img_dir, fname),
